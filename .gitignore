@@ -6,6 +6,8 @@
 data/raw/*
 !data/raw/.gitkeep
 !data/raw/off_ch_raw.parquet
+!data/raw/aldi_raw.parquet
+!data/raw/volg_raw.parquet
 
 # Python
 __pycache__/
