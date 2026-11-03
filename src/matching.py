@@ -30,6 +30,9 @@ from scraping import _write_parquet
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED_DIR = ROOT / "data" / "processed"
 OFF_PATH = PROCESSED_DIR / "off_ch_clean.parquet"
+OFF_EXT_PATH = PROCESSED_DIR / "off_aldi_ext_clean.parquet"      # E6: DE/AT, Aldi brands
+INGREDIENTS_PATH = ROOT / "data" / "raw" / "off_ingredients.parquet"
+ALDI_DETAILS_PATH = ROOT / "data" / "raw" / "aldi_details_raw.parquet"
 
 NUTRIENTS = ["energy_kj", "fat", "saturated_fat", "carbohydrates", "sugars", "fiber", "proteins", "salt"]
 OFF_COLUMNS = ["code", "product_name", "brands", "product_quantity", "product_quantity_unit",
@@ -45,6 +48,16 @@ SIZE_TOLERANCE = 0.10
 GENERIC_BRANDS = {"bio", "no brand", "sans marque", "ohne marke",
                   # common words used as brand names by several unrelated companies
                   "american", "bbq", "halloween", "gourmet", "premium"}
+
+# M9 ingredient similarity thresholds (calibrated in docs/matching_decisions.md).
+ING_ACCEPT = 70       # confirms a match
+ING_REJECT = 30       # contradicts a match
+ING_RESCUE_NAME = 60  # minimum name score for a match accepted on ingredients
+ING_STOPWORDS = {"zutaten", "und", "mit", "aus", "von", "enthalt", "enthalten", "kann", "spuren",
+                 "davon", "anteil", "insgesamt", "mind", "mindestens", "sowie", "oder", "der",
+                 "die", "das", "den", "dem", "des", "ein", "eine", "einer", "zum", "zur",
+                 "verschiedenen", "anderen", "erzeugnisse", "erzeugnissen", "hergestellt",
+                 "biologischer", "landwirtschaft", "kontrolliert", "naturlich", "naturliches"}
 
 # Words that carry no product identity in names (M2).
 STOPWORDS = {"mit", "und", "de", "la", "le", "les", "du", "des", "et", "aux", "au", "a", "al", "di",
@@ -78,6 +91,33 @@ def _coverage(a: list[str], b: list[str]) -> float:
     return sum(any(fuzz.ratio(t, u) >= 85 for u in b) for t in a) / len(a)
 
 
+_LANG_MARKERS = {
+    "de": {"und", "mit", "zucker", "salz", "wasser", "milch", "enthalt", "spuren", "kann", "aus",
+           "weizenmehl", "pflanzliche", "speisesalz", "saure", "zutaten", "von"},
+    "fr": {"et", "de", "du", "des", "sucre", "sel", "eau", "lait", "huile", "peut", "contenir",
+           "traces", "farine", "ingredients", "acide"},
+    "it": {"di", "e", "zucchero", "sale", "acqua", "latte", "olio", "puo", "contenere", "farina",
+           "ingredienti"},
+    "en": {"and", "sugar", "salt", "water", "milk", "oil", "may", "contain", "flour", "ingredients"},
+}
+
+
+def is_german(text: str | None) -> bool:
+    """M9: the OFF export has no language column; count frequent function words."""
+    words = norm(text).split()
+    counts = {lang: sum(w in m for w in words) for lang, m in _LANG_MARKERS.items()}
+    return counts["de"] >= 2 and counts["de"] > max(v for k, v in counts.items() if k != "de")
+
+
+def ingredient_tokens(text: str | None) -> list[str] | None:
+    """M9: the distinct words of an ingredient list, without numbers and filler words."""
+    if not text:
+        return None
+    toks = [t for t in norm(re.sub(r"\d+(?:[.,]\d+)?\s*%", " ", text)).split()
+            if len(t) >= 3 and not t.isdigit() and t not in ING_STOPWORDS]
+    return list(dict.fromkeys(toks)) or None
+
+
 def name_score(a: list[str], b: list[str]) -> float:
     """M3: harmonic mean of the coverage in both directions, 0-100.
 
@@ -96,10 +136,24 @@ def _load(path: Path, cols: list[str] | None = None, where: str = "") -> list[di
 
 
 class OffIndex:
-    def __init__(self):
+    def __init__(self, include_ext: bool = False):
         self.rows = _load(OFF_PATH, OFF_COLUMNS, "WHERE product_name IS NOT NULL")
+        for o in self.rows:
+            o["scope"] = "ch"
+        if include_ext and OFF_EXT_PATH.exists():
+            ext = _load(OFF_EXT_PATH, OFF_COLUMNS, "WHERE product_name IS NOT NULL")
+            for o in ext:
+                o["scope"] = "de_at"
+            self.rows += ext
+        ingr = {}
+        if INGREDIENTS_PATH.exists():
+            # Only German lists are compared with Aldi's German ingredients (M9).
+            ingr = {c: t for c, t in duckdb.sql(
+                f"SELECT code, ingredients_text FROM '{INGREDIENTS_PATH.as_posix()}' "
+                "WHERE ingredients_text IS NOT NULL").fetchall() if is_german(t)}
         self.by_brand: dict[str, list[dict]] = collections.defaultdict(list)
         for o in self.rows:
+            o["_ingr"] = ingredient_tokens(ingr.get(o["code"]))
             o["_brands"] = {norm(b) for b in (o["brands"] or "").split(",") if norm(b)}
             for b in o["_brands"]:
                 self.by_brand[b].append(o)
@@ -132,28 +186,59 @@ def _size_ratio(r: dict, o: dict) -> float | None:
     return round(min(r["size_value"], o["product_quantity"]) / max(r["size_value"], o["product_quantity"]), 3)
 
 
+def _name_ok(s: float, size_ok: bool, retail_cov: float) -> bool:
+    return s >= ACCEPT_SCORE or (size_ok and s >= ACCEPT_SCORE_WITH_SIZE and retail_cov == 1)
+
+
+def _tier(s: float, size_ok: bool, retail_cov: float, ingr: float | None) -> int:
+    """2 = accepted, 1 = probable, 0 = rejected.
+
+    M4: below 90 the size must agree AND every word of the shop's name must be found in
+    the OFF name; a missing shop word is usually the variant ("Sugarfree", "Waldbeer").
+    M9: ingredients below ING_REJECT veto a name match. Ingredients alone (name score
+    60-89, ingredients >= ING_ACCEPT) only make a match *probable*: in review they picked
+    flavour and "light" variants, which share the ingredient list.
+    M10: German/Austrian entries follow the same rule as Swiss ones; same-name pairs
+    agree on nutrition as often across countries as within one (cross_country_check).
+    The Swiss entry still wins ties (best_match sort key).
+    """
+    if ingr is not None and ingr < ING_REJECT:
+        return 0
+    if _name_ok(s, size_ok, retail_cov):
+        return 2
+    return 1 if ingr is not None and ingr >= ING_ACCEPT and s >= ING_RESCUE_NAME else 0
+
+
 def best_match(r: dict, cands: list[dict], brand: str | None, shop: str) -> dict:
-    """Score every candidate; tie-break by size, store tag and popularity (M5)."""
+    """Score every candidate; acceptable ones first, then name score, Swiss entry (the
+    recipe actually sold in Switzerland), ingredients, size, store tag and popularity (M5)."""
     toks = tokens(r["name"], brand)
+    brand_toks = set(norm(brand).split())
+    r_ingr = r.get("_ingr")
     scored = []
     for o in cands:
-        otoks = [t for t in o["_tokens"] if t not in set(norm(brand).split())]
+        otoks = [t for t in o["_tokens"] if t not in brand_toks]
         s = name_score(toks, otoks)
         ratio = _size_ratio(r, o)
         size_ok = ratio is not None and ratio >= 1 - SIZE_TOLERANCE
-        scored.append((s, size_ok, bool(o[f"store_{shop}"]), o["unique_scans_n"] or 0, ratio, o,
-                       _coverage(toks, otoks)))
-    scored.sort(key=lambda x: x[:4], reverse=True)
+        ingr = (name_score(r_ingr, o["_ingr"])
+                if r_ingr and o["_ingr"] and s >= ING_RESCUE_NAME else None)
+        cov = _coverage(toks, otoks)
+        tier = _tier(s, size_ok, cov, ingr)
+        scored.append({"key": (tier, s, o["scope"] == "ch", ingr or 0, size_ok,
+                               bool(o[f"store_{shop}"]), o["unique_scans_n"] or 0),
+                       "s": s, "ratio": ratio, "size_ok": size_ok, "cov": cov, "ingr": ingr,
+                       "o": o, "tier": tier})
     if not scored:
         return {}
-    s, size_ok, _, _, ratio, o, retail_cov = scored[0]
-    # M4: below 90 the size must agree AND every word of the shop's name must be found
-    # in the OFF name; a missing shop word is usually the variant ("Sugarfree", "Waldbeer").
-    accepted = s >= ACCEPT_SCORE or (size_ok and s >= ACCEPT_SCORE_WITH_SIZE and retail_cov == 1)
+    scored.sort(key=lambda x: x["key"], reverse=True)
+    b, o = scored[0], scored[0]["o"]
     return {"off_code": o["code"], "off_name": o["product_name"], "off_brands": o["brands"],
-            "score": s, "retail_coverage": round(retail_cov, 3), "size_ratio": ratio,
-            "size_match": size_ok, "second_score": scored[1][0] if len(scored) > 1 else None,
-            "accepted": accepted}
+            "off_scope": o["scope"], "score": b["s"], "retail_coverage": round(b["cov"], 3),
+            "ingredient_score": b["ingr"], "size_ratio": b["ratio"], "size_match": b["size_ok"],
+            "second_score": scored[1]["s"] if len(scored) > 1 else None,
+            "accepted": b["tier"] == 2,
+            "probable": b["tier"] == 1}   # M9: ingredients agree, name not enough; not used
 
 
 def match_shop(shop: str, rows: list[dict], off: OffIndex) -> list[dict]:
@@ -183,7 +268,7 @@ def match_shop(shop: str, rows: list[dict], off: OffIndex) -> list[dict]:
         # M7: no usable brand -> the shop's own products in OFF, name only, strict.
         if rec["method"] is None or not rec.get("accepted"):
             fb = best_match(r, store_cands, brand, shop)
-            if fb and fb["score"] >= ACCEPT_SCORE and fb["size_match"]:
+            if fb and fb["accepted"] and fb["score"] >= ACCEPT_SCORE and fb["size_match"]:
                 rec.update(fb, method="store_name")
             elif rec["method"] is None and fb:
                 rec.update(fb, method="store_name", accepted=False)
@@ -214,6 +299,7 @@ def combine(aldi: list[dict], volg: list[dict], matches: list[dict], off: OffInd
                    "origin_status_retailer": r.get("origin_status"),
                    "matched": o is not None, "match_score": m.get("score") if o else None,
                    "match_method": m["method"] if o else None,
+                   "off_scope": m.get("off_scope") if o else None,
                    "off_code": o and o["code"], "off_name": o and o["product_name"]}
             for c in ["main_category", "pnns_group_1", "pnns_group_2", "nutriscore_grade",
                       "nutriscore_score", "nova_group", "origin_status"]:
@@ -237,6 +323,48 @@ def _to_csv(name: str) -> None:
     duckdb.sql(f"COPY (SELECT * FROM '{pq}') TO '{(PROCESSED_DIR / f'{name}.csv').as_posix()}' (HEADER)")
 
 
+def nutrition_agrees(a: dict, b: dict) -> bool | None:
+    """Same tolerance as the Volgshop validation: energy +-12 % (min 40 kJ); fat, sugars
+    and proteins +-20 % (min 1.5 g)."""
+    keys = ["energy_kj", "fat", "sugars", "proteins"]
+    if any(a.get(k) is None or b.get(k) is None for k in keys):
+        return None
+    tol = {"energy_kj": (40, 0.12), "fat": (1.5, 0.2), "sugars": (1.5, 0.2), "proteins": (1.5, 0.2)}
+    return all(abs(a[k] - b[k]) <= max(t[0], t[1] * a[k]) for k, t in tol.items())
+
+
+def cross_country_check(off: OffIndex) -> dict:
+    """M10 check: pairs of OFF entries with the same brand, name (score 100) and package
+    size, one Swiss and one German/Austrian. Writes cross_country_check.csv."""
+    pairs = []
+    for brand, rows in off.by_brand.items():
+        if brand in GENERIC_BRANDS:
+            continue
+        ch = [o for o in rows if o["scope"] == "ch"]
+        ext = [o for o in rows if o["scope"] == "de_at"]
+        for e in ext:
+            etoks = [t for t in e["_tokens"] if t not in set(brand.split())]
+            for c in ch:
+                ctoks = [t for t in c["_tokens"] if t not in set(brand.split())]
+                if (name_score(etoks, ctoks) == 100 and e["product_quantity"] and c["product_quantity"]
+                        and e["product_quantity_unit"] == c["product_quantity_unit"]
+                        and min(e["product_quantity"], c["product_quantity"])
+                        / max(e["product_quantity"], c["product_quantity"]) >= 1 - SIZE_TOLERANCE):
+                    ingr = name_score(e["_ingr"], c["_ingr"]) if e["_ingr"] and c["_ingr"] else None
+                    pairs.append({"brand": brand, "ch_code": c["code"], "ch_name": c["product_name"],
+                                  "de_at_code": e["code"], "de_at_name": e["product_name"],
+                                  "ingredient_score": ingr, "agree": nutrition_agrees(c, e)})
+    pairs = list({(p["ch_code"], p["de_at_code"]): p for p in pairs}.values())
+    _write_parquet(pairs or [{"brand": None}], PROCESSED_DIR / "cross_country_check.parquet")
+    _to_csv("cross_country_check")
+    judged = [p for p in pairs if p["agree"] is not None]
+    confirmed = [p for p in judged if (p["ingredient_score"] or 0) >= ING_ACCEPT]
+    return {"pairs": len(pairs), "with_nutrition": len(judged),
+            "agree": sum(p["agree"] for p in judged),
+            "ingredients_confirmed": len(confirmed),
+            "agree_when_ingredients_confirmed": sum(p["agree"] for p in confirmed)}
+
+
 def write_review_sample(matches: list[dict], n_per_shop: int = 50, seed: int = 42) -> None:
     rng = random.Random(seed)
     rows = []
@@ -254,19 +382,30 @@ def write_review_sample(matches: list[dict], n_per_shop: int = 50, seed: int = 4
 
 
 def main() -> None:
-    off = OffIndex()
+    off = OffIndex()                          # Volgshop: Swiss entries only
+    off_aldi = OffIndex(include_ext=True)     # Aldi: Swiss + DE/AT Aldi-brand entries (M10)
     aldi = _load(PROCESSED_DIR / "aldi_clean.parquet")
+    details = {}
+    if ALDI_DETAILS_PATH.exists():
+        details = dict(duckdb.sql(f"SELECT sku, ingredients FROM '{ALDI_DETAILS_PATH.as_posix()}'")
+                       .fetchall())
+    for r in aldi:
+        text = details.get(r["sku"])
+        r["_ingr"] = ingredient_tokens(text) if is_german(text) else None
     volg = _load(PROCESSED_DIR / "volg_clean.parquet")
     for r in aldi:
         r["retailer"] = "aldi"
     for r in volg:
         r["retailer"], r["brand"] = "volg", None
-    matches = match_shop("aldi", aldi, off) + match_shop("volg", volg, off)
+        r["_ingr"] = ingredient_tokens(r["ingredients"]) if is_german(r["ingredients"]) else None
+    matches = match_shop("aldi", aldi, off_aldi) + match_shop("volg", volg, off)
     _write_parquet(matches, PROCESSED_DIR / "matches.parquet")
     _to_csv("matches")
-    _write_parquet(combine(aldi, volg, matches, off), PROCESSED_DIR / "products_matched.parquet")
+    _write_parquet(combine(aldi, volg, matches, off_aldi), PROCESSED_DIR / "products_matched.parquet")
     _to_csv("products_matched")
     write_review_sample(matches)
+    if OFF_EXT_PATH.exists():
+        print("cross-country check:", cross_country_check(off_aldi))
     for shop in ("aldi", "volg"):
         ms = [m for m in matches if m["retailer"] == shop]
         acc = collections.Counter(m["method"] for m in ms if m["accepted"])

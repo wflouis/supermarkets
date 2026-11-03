@@ -8,6 +8,9 @@ data/raw/*
 !data/raw/off_ch_raw.parquet
 !data/raw/aldi_raw.parquet
 !data/raw/volg_raw.parquet
+!data/raw/aldi_details_raw.parquet
+!data/raw/off_aldi_ext_raw.parquet
+!data/raw/off_ingredients.parquet
 
 # Python
 __pycache__/

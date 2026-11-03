@@ -13,6 +13,7 @@ Output (each run overwrites the previous snapshot):
 
 Usage:
     python src/scraping.py aldi
+    python src/scraping.py aldi-details   # ingredients, after retail_cleaning.py
     python src/scraping.py volg
     python src/scraping.py all
 
@@ -203,6 +204,43 @@ def scrape_aldi(raw_dir: Path = RAW_DIR) -> dict:
             "unfiltered_total_reported": total_unfiltered, "requests": client.n_requests}
 
 
+def scrape_aldi_details(raw_dir: Path = RAW_DIR,
+                        skus_from: Path = ROOT / "data" / "processed" / "aldi_clean.parquet") -> dict:
+    """Detail endpoint for the cleaned (food) Aldi products: ingredient list and claims.
+
+    The detail record has no nutrition values either; the ingredients are used to
+    confirm matches against Open Food Facts (docs/matching_decisions.md, M9).
+    """
+    skus = [r[0] for r in duckdb.sql(f"SELECT sku FROM '{skus_from.as_posix()}' ORDER BY sku").fetchall()]
+    client = Client(raw_dir / "aldi_details_responses.jsonl.gz", f"{ALDI_WEB}/robots.txt")
+    scraped_at, rows, missing = _now(), [], 0
+    try:
+        for sku in skus:
+            try:
+                body, _ = client.get(f"{ALDI_API}/v2/products/{sku}?serviceType=walk-in",
+                                     check_robots=False)
+            except urllib.error.HTTPError:
+                missing += 1
+                continue
+            d = body["data"]
+            rows.append({
+                "sku": sku,
+                "ingredients": d.get("ingredients"),
+                "country_origin": d.get("countryOrigin"),
+                "nutritional_claims": [f"{c.get('label')}: {c.get('value')}"
+                                       for c in d.get("nutritionalClaims") or []],
+                "allergens": [str(a) for a in d.get("allergens") or []],
+                "storage_instructions": d.get("storageInstructions"),
+                "description": re.sub(r"<[^>]+>", " ", d.get("description") or "").strip() or None,
+                "scraped_at": scraped_at,
+            })
+    finally:
+        client.close()
+    n = _write_parquet(rows, raw_dir / "aldi_details_raw.parquet")
+    return {"products": n, "not_found": missing, "requests": client.n_requests,
+            "with_ingredients": sum(bool(r["ingredients"]) for r in rows)}
+
+
 # --------------------------------------------------------------------------- volg
 # Volgshop's nutrition field is free text in many layouts, e.g.
 #   "Energie in kJ\n 1589\n Energie in kcal\n 383\n Fett\n 31g ..."
@@ -352,10 +390,12 @@ def scrape_volg(raw_dir: Path = RAW_DIR) -> dict:
 # --------------------------------------------------------------------------- cli
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("shop", choices=["aldi", "volg", "all"])
+    ap.add_argument("shop", choices=["aldi", "aldi-details", "volg", "all"])
     shop = ap.parse_args().shop
     if shop in ("aldi", "all"):
         print("aldi:", scrape_aldi())
+    if shop == "aldi-details":   # needs data/processed/aldi_clean.parquet (retail_cleaning.py)
+        print("aldi details:", scrape_aldi_details())
     if shop in ("volg", "all"):
         print("volg:", scrape_volg())
 

@@ -22,6 +22,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import shutil
 import urllib.request
 from datetime import datetime, timezone
@@ -112,13 +113,71 @@ def extract_swiss(src: Path = CSV_PATH, dst: Path = RAW_PATH) -> dict:
     return stats
 
 
+# --------------------------------------------------------------------------- aldi extension
+ALDI_EXT_RAW_PATH = RAW_DIR / "off_aldi_ext_raw.parquet"
+INGREDIENTS_PATH = RAW_DIR / "off_ingredients.parquet"
+ALDI_EXT_COUNTRIES = ["en:germany", "en:austria"]
+# Brand labels too generic to select products by (same list as matching.GENERIC_BRANDS).
+_GENERIC = {"bio", "no brand", "sans marque", "ohne marke", "american", "bbq", "halloween",
+            "gourmet", "premium"}
+
+
+def _reader(src: Path) -> str:
+    return (f"read_csv('{src.as_posix()}', delim='	', quote='', header=true, all_varchar=true, "
+            f"ignore_errors=true, max_line_size=10000000)")
+
+
+def _aldi_brand_regex(aldi_clean: Path) -> str:
+    brands = duckdb.sql(f"SELECT DISTINCT lower(trim(brand)) FROM '{aldi_clean.as_posix()}' "
+                        "WHERE brand IS NOT NULL").fetchall()
+    names = sorted({b for (b,) in brands if b and b not in _GENERIC and len(b) >= 3})
+    esc = [re.escape(b).replace("'", "''") for b in names]
+    # brands is a comma-separated list; match a whole entry
+    return "(^|,)\s*(" + "|".join(esc) + ")\s*(,|$)"
+
+
+def extract_aldi_extension(src: Path = CSV_PATH, dst: Path = ALDI_EXT_RAW_PATH,
+                           aldi_clean: Path = PROCESSED_DIR / "aldi_clean.parquet") -> dict:
+    """E6: products NOT tagged Switzerland, sold in Germany or Austria (Aldi Süd, Hofer),
+    whose brand is one Aldi Suisse sells, or that list Aldi/Hofer as store. Same columns
+    as the Swiss extract, so the same cleaning applies."""
+    con = duckdb.connect()
+    cols = ", ".join(f'"{c}"' for c in RAW_COLUMNS)
+    countries = " OR ".join(f"list_contains(ct, '{c}')" for c in ALDI_EXT_COUNTRIES)
+    con.execute(f"""COPY (
+        SELECT {cols} FROM (SELECT *, string_split(countries_tags, ',') AS ct FROM {_reader(src)})
+        WHERE NOT list_contains(ct, 'en:switzerland') AND ({countries})
+          AND (regexp_matches(lower(coalesce(brands, '')), '{_aldi_brand_regex(aldi_clean)}')
+               OR regexp_matches(lower(coalesce(stores, '')), '\b(aldi|hofer)\b'))
+        ) TO '{dst.as_posix()}' (FORMAT parquet)""")
+    return {"aldi_ext_rows": con.execute(f"SELECT count(*) FROM '{dst.as_posix()}'").fetchone()[0]}
+
+
+def extract_ingredients(src: Path = CSV_PATH, dst: Path = INGREDIENTS_PATH) -> dict:
+    """E7: ingredient text for every code in the Swiss and the Aldi-extension extracts,
+    from the newer dump. Kept apart so the Swiss snapshot (E5) is not replaced. The export
+    has no language column; matching.py detects German text itself."""
+    con = duckdb.connect()
+    codes = f"""SELECT code FROM '{RAW_PATH.as_posix()}' UNION
+                SELECT code FROM '{ALDI_EXT_RAW_PATH.as_posix()}'"""
+    con.execute(f"""COPY (
+        SELECT code, nullif(trim(ingredients_text), '') AS ingredients_text
+        FROM {_reader(src)} WHERE code IN ({codes})
+        ) TO '{dst.as_posix()}' (FORMAT parquet)""")
+    n = con.execute(f"SELECT count(*), count(ingredients_text) FROM '{dst.as_posix()}'").fetchone()
+    return {"ingredient_rows": n[0], "with_ingredients": n[1]}
+
+
 # --------------------------------------------------------------------------- clean
 def _norm_brand_sql(expr: str) -> str:
     return f"trim(regexp_replace(replace(lower({expr}), '-', ' '), '\\s+', ' ', 'g'))"
 
 
-def clean(src: Path = RAW_PATH, out_dir: Path = PROCESSED_DIR) -> list[tuple]:
-    """Apply filters F1-F7 and transformations C1-C12; write table, log and metadata."""
+def clean(src: Path = RAW_PATH, out_dir: Path = PROCESSED_DIR, name: str = "off_ch") -> list[tuple]:
+    """Apply filters F1-F7 and transformations C1-C12; write table and log.
+
+    name sets the output files (<name>_clean.parquet/.csv, <name>_cleaning_log.csv), so
+    the same rules can be applied to the non-Swiss Aldi-brand extract (E6)."""
     con = duckdb.connect()
     log: list[tuple] = []
 
@@ -279,7 +338,7 @@ def clean(src: Path = RAW_PATH, out_dir: Path = PROCESSED_DIR) -> list[tuple]:
         manufacturing_places_tags, countries_tags, completeness, unique_scans_n,
         created_at, last_modified_at"""
     out_dir.mkdir(parents=True, exist_ok=True)
-    clean_path, csv_path = out_dir / CLEAN_PATH.name, out_dir / CLEAN_CSV_PATH.name
+    clean_path, csv_path = out_dir / f"{name}_clean.parquet", out_dir / f"{name}_clean.csv"
     con.execute(f"COPY (SELECT {order} FROM cur ORDER BY code) TO '{clean_path.as_posix()}' (FORMAT parquet)")
     # CSV copy for spreadsheets: lists joined with "|" so they survive the comma delimiter.
     list_cols = ["categories_tags", "labels_tags", "origins_tags", "manufacturing_places_tags", "countries_tags"]
@@ -287,7 +346,7 @@ def clean(src: Path = RAW_PATH, out_dir: Path = PROCESSED_DIR) -> list[tuple]:
     con.execute(f"""COPY (SELECT * REPLACE ({replace}) FROM '{clean_path.as_posix()}')
                     TO '{csv_path.as_posix()}' (HEADER, DELIMITER ',')""")
 
-    with open(out_dir / LOG_PATH.name, "w", newline="", encoding="utf-8") as fh:
+    with open(out_dir / f"{name}_cleaning_log.csv", "w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(["rule", "description", "rows_before", "rows_removed", "rows_after"])
         w.writerows(log)
@@ -312,10 +371,35 @@ def write_metadata(extract_stats: dict | None, log: list[tuple]) -> None:
     META_PATH.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def write_extension_metadata(log: list[tuple]) -> None:
+    """E6/E7 provenance, next to the Swiss snapshot's (which it does not change)."""
+    meta = json.loads(META_PATH.read_text(encoding="utf-8")) if META_PATH.exists() else {}
+    meta["aldi_extension"] = {
+        "source_url": DUMP_URL,
+        "source_downloaded_at": datetime.fromtimestamp(
+            CSV_PATH.stat().st_mtime, tz=timezone.utc).isoformat(timespec="seconds"),
+        "countries": ALDI_EXT_COUNTRIES,
+        "raw_parquet_sha256": hashlib.sha256(ALDI_EXT_RAW_PATH.read_bytes()).hexdigest(),
+        "ingredients_parquet_sha256": hashlib.sha256(INGREDIENTS_PATH.read_bytes()).hexdigest(),
+        "rows_raw": log[0][2], "rows_clean": log[-1][4],
+        "cleaned_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    META_PATH.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("stage", choices=["download", "extract", "clean", "all"])
+    parser.add_argument("stage", choices=["download", "extract", "clean", "all", "aldi-ext"])
     stage = parser.parse_args().stage
+    if stage == "aldi-ext":   # E6/E7; needs the dump on disk and data/processed/aldi_clean.parquet
+        if not ALDI_EXT_RAW_PATH.exists():
+            print(extract_aldi_extension())
+        print(extract_ingredients())
+        log = clean(ALDI_EXT_RAW_PATH, PROCESSED_DIR, name="off_aldi_ext")
+        write_extension_metadata(log)
+        for rule, desc, before, removed, after in log:
+            print(f"{rule:<4} {desc[:60]:<60}  -{removed:>6}  -> {after}")
+        return
 
     if stage in ("download", "all"):
         print(f"Downloading {DUMP_URL} ...")

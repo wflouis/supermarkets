@@ -10,5 +10,18 @@
   "cleaned_at": "2026-11-03T11:28:05+00:00",
   "rows_raw": 107342,
   "rows_clean": 73738,
-  "licence": "Open Database License (ODbL) — https://world.openfoodfacts.org/terms-of-use"
+  "licence": "Open Database License (ODbL) — https://world.openfoodfacts.org/terms-of-use",
+  "aldi_extension": {
+    "source_url": "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz",
+    "source_downloaded_at": "2026-11-03T15:40:54+00:00",
+    "countries": [
+      "en:germany",
+      "en:austria"
+    ],
+    "raw_parquet_sha256": "af739e4351ff050fade05f74b71e5f6e9181483bded56613603e4235421a5db5",
+    "ingredients_parquet_sha256": "6d93af1fd7d14a28804e154e2f1a86266ab498b4f1b926d012c4e36e829570ec",
+    "rows_raw": 23824,
+    "rows_clean": 15162,
+    "cleaned_at": "2026-11-03T16:13:17+00:00"
+  }
 }

@@ -76,6 +76,27 @@ El CSV de 1.5 GB no.**
 datos. Versionar el extracto congela el snapshot que usamos. El CSV completo supera el
 límite de 100 MB de GitHub. El SHA-256 del extracto queda guardado en el JSON de metadatos.
 
+**E6. Extensión para Aldi: fichas de Alemania y Austria** (`python src/openfoodfacts.py
+aldi-ext`, `data/raw/off_aldi_ext_raw.parquet`).
+Del export descargado el 2026-11-03 se extraen los productos **no** etiquetados en Suiza
+y etiquetados en Alemania o Austria (`en:germany`, `en:austria`), cuya marca es una de
+las que vende Aldi Suisse (una entrada completa de `brands`, sin marcas genéricas como
+"Bio") o cuya tienda menciona Aldi u Hofer. Se extraen las mismas 37 columnas, y se limpian
+con exactamente las mismas reglas F1–F7 y C1–C12 que el subconjunto suizo: de 23 824
+filas quedan 15 162 (`off_aldi_ext_cleaning_log.csv`, `off_aldi_ext_clean.parquet`).
+*Justificación:* muchas marcas propias de Aldi Suisse son las de Aldi Süd y Hofer, y sin
+este paso solo se emparejaba el 6.5 % del surtido de Aldi. Que una ficha alemana sirva
+como sustituto se comprobó en M10 de [`matching_decisions.md`](matching_decisions.md).
+Este extracto viene de un snapshot más nuevo que el suizo (2026-11-02). El subconjunto
+suizo **no** se reextrajo, para no cambiar los datos de los que dependen los pasos ya
+hechos.
+
+**E7. Ingredientes** (`data/raw/off_ingredients.parquet`). `ingredients_text` para todos los
+códigos de los extractos suizo y de E6, del mismo snapshot que E6. Se usa solo para
+confirmar o vetar matches (M9). El export no tiene una columna de idioma; el alemán se
+detecta en `matching.py`. Las procedencias (URL, fecha de descarga, SHA-256) están en
+`off_ch_metadata.json`, bajo `aldi_extension`.
+
 ## F. Filtros (eliminan filas)
 
 **F1. El código debe ser un EAN-8 o EAN-13 válido, con dígito verificador correcto.**
