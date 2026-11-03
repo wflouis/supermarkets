@@ -1,0 +1,13 @@
+shop,rule,description,rows_before,rows_removed,rows_after
+aldi,F1,Duplicate SKU,2406,0,2406
+aldi,F2,"Non-food (category, Aktionen sub-category or non-food brand)",2406,377,2029
+aldi,F3,Alcohol or tobacco,2029,140,1889
+aldi,F4,Baby food,1889,9,1880
+aldi,F5,"No price per 100 g/ml (size missing, count-based or a weight range)",1880,297,1583
+aldi,F6,Price per 100 g/ml outside CHF 0.01-50,1583,6,1577
+volg,F1,Duplicate product id,696,0,696
+volg,F2,"Non-food (Körperpflege, Reinigung, Haushalt, Tierbedarf)",696,114,582
+volg,F3,"Alcohol or tobacco (Jugendschutz, Tabakwaren)",582,103,479
+volg,F4,Baby food,479,0,479
+volg,F5,"No price per 100 g/ml (size missing, count-based, a weight range or unresolved)",479,34,445
+volg,F6,Price per 100 g/ml outside CHF 0.01-50,445,0,445

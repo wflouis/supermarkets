@@ -1,0 +1,16 @@
+{
+  "volg": {
+    "raw_parquet_sha256": "6cb5a83c8caf837516f989f6bb4d865403d65fe3d0c5d6e501ad7516982d7af3",
+    "scraped_at": "2026-11-03T15:05:03Z",
+    "cleaned_at": "2026-11-03T15:21:59+00:00",
+    "rows_raw": 696,
+    "rows_clean": 445
+  },
+  "aldi": {
+    "raw_parquet_sha256": "ea41f0e53ed496cb88bec42576f99e766291d532f5f6de5cf3905d968bc84253",
+    "scraped_at": "2026-11-03T15:06:13Z",
+    "cleaned_at": "2026-11-03T15:21:59+00:00",
+    "rows_raw": 2406,
+    "rows_clean": 1577
+  }
+}

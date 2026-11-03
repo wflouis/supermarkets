@@ -249,9 +249,17 @@ def parse_volg_nutrition(text: str | None) -> dict:
     out["nutrition_has_lt"] = None
     if not text:
         return out
-    basis = re.search(r"(?:pro|\()\s*(\d+)\s*(g|gr|ml)\b", text, re.I)
-    if basis:
-        out["nutrition_basis"] = basis.group(1) + basis.group(2).lower().replace("gr", "g")
+    # Basis: "100 g" anywhere wins (tables with a 100 g and a portion column list the
+    # 100 g value first). Otherwise an explicit "pro 30g" / "(30 g enthalten)". A portion
+    # in a footnote ("Eine Dose enthält 1 Portion (250 ml)") is not a basis.
+    hundred = re.search(r"\b100\s*(g|gr|ml)\b", text, re.I)
+    basis = re.search(r"\b(?:pro|je)\b\s*:?\s*(\d+)\s*(g|gr|ml)\b|\((\d+)\s*(g|gr|ml)\s*enthalten\)",
+                      text, re.I)
+    if hundred:
+        out["nutrition_basis"] = "100" + hundred.group(1).lower().replace("gr", "g")
+    elif basis:
+        num, unit = (basis.group(1), basis.group(2)) if basis.group(1) else basis.group(3, 4)
+        out["nutrition_basis"] = num + unit.lower().replace("gr", "g")
     matches = list(_LABEL_RE.finditer(text))
     if not matches:
         return out
