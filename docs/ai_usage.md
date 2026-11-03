@@ -4,3 +4,4 @@ Running log of AI tool usage: what was asked, whether the output was usable, and
 
 | Date | Tool | Task | Usable? | Manual corrections |
 |---|---|---|---|---|
+| 2026-11-03 | Claude Code (Opus 5.5) | Open Food Facts pipeline: download of the CSV export, Swiss extraction and cleaning (`src/openfoodfacts.py`), decision log (`docs/off_cleaning_decisions.md`) | Yes | First version of the kJ/kcal rule removed 2,896 rows; profiling showed 93 % had a correct kJ value, so the rule was changed to cross-check against macronutrients (196 rows removed). Retailer brand lists to be reviewed by the team. |

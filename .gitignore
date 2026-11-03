@@ -5,6 +5,7 @@
 # Raw scraper and API output
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/off_ch_raw.parquet
 
 # Python
 __pycache__/

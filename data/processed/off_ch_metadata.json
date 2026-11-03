@@ -1,0 +1,14 @@
+{
+  "source_url": "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz",
+  "source_file_bytes": 1526983107,
+  "source_downloaded_at": "2026-11-02T21:16:10+00:00",
+  "extract": {
+    "swiss_rows": 107342,
+    "rejected_lines_whole_file": 0
+  },
+  "raw_parquet_sha256": "d20afa7fe56ec10888fdc199bfa07701f39c1fe599859b9d1b4f6dce030e9c8a",
+  "cleaned_at": "2026-11-03T11:28:05+00:00",
+  "rows_raw": 107342,
+  "rows_clean": 73738,
+  "licence": "Open Database License (ODbL) — https://world.openfoodfacts.org/terms-of-use"
+}
