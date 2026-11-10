@@ -12,9 +12,10 @@ Usage:
     python src/matching.py
 
 Neither shop publishes EANs, so matching is by brand and name (README, pass 2). Rules
-M1-M12 are justified in docs/matching_decisions.md. products_matched also carries the
+M1-M13 are justified in docs/matching_decisions.md. products_matched also carries the
 Migros/Coop/Lidl/Denner prices from Open Prices (M11, joined on EAN by openprices.py)
-and a Nutri-Score computed from the nutrition table where OFF has none (M12, nutriscore.py).
+and a Nutri-Score computed from the nutrition table where OFF has none (M12, nutriscore.py),
+and a common PNNS category for every product (M13, categories.py).
 """
 from __future__ import annotations
 
@@ -27,6 +28,7 @@ from pathlib import Path
 import duckdb
 from rapidfuzz import fuzz
 
+from categories import add_category
 from nutriscore import add_nutriscore
 from scraping import _write_parquet
 
@@ -448,6 +450,7 @@ def main() -> None:
     ingredients = {("aldi", str(r["sku"])): details.get(r["sku"]) for r in aldi}
     ingredients |= {("volg", str(r["product_id"])): r["ingredients"] for r in volg}
     add_nutriscore(combined, ingredients)
+    add_category(combined)   # M13: common PNNS category (categories.py)
     _write_parquet(combined, PROCESSED_DIR / "products_matched.parquet")
     _to_csv("products_matched")
     write_review_sample(matches)

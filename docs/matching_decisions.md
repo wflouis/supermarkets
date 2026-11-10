@@ -5,7 +5,7 @@ Script: [`src/matching.py`](../src/matching.py) · Resultados en
 `data/processed/products_matched.parquet` (un registro por producto: precio + nutrición).
 Muestra de revisión manual: `data/processed/match_review_sample.csv`.
 
-Los identificadores (M1…M12) aparecen como comentarios en el código. Los candidatos OFF
+Los identificadores (M1…M13) aparecen como comentarios en el código. Los candidatos OFF
 son el subconjunto suizo limpio y, solo para Aldi, las fichas alemanas y austriacas de
 las marcas que vende Aldi (E6 de [`off_cleaning_decisions.md`](off_cleaning_decisions.md)).
 
@@ -184,6 +184,11 @@ entre cadenas, aunque en una muestra pequeña.
 calcula el Nutri-Score 2023 a partir de la tabla nutricional (`nutriscore.py`). El grado de
 OFF tiene prioridad. Con esto, los productos con Nutri-Score pasan de 706 a 1 064. Reglas
 y validación en [`nutriscore_decisions.md`](nutriscore_decisions.md).
+
+**M13. Categoría común (`category_common`).** Es el grupo PNNS 1 de OFF y, si el producto no
+lo tiene, el que dan las reglas por categoría de la tienda y nombre (`categories.py`). El 98 %
+de los productos con Nutri-Score tiene categoría (1 045 de 1 064). Reglas y validación en
+[`category_decisions.md`](category_decisions.md).
 
 ## Limitaciones
 
