@@ -12,8 +12,9 @@ Usage:
     python src/matching.py
 
 Neither shop publishes EANs, so matching is by brand and name (README, pass 2). Rules
-M1-M11 are justified in docs/matching_decisions.md. products_matched also carries the
-Migros/Coop/Lidl/Denner prices from Open Prices (M11, joined on EAN by openprices.py).
+M1-M12 are justified in docs/matching_decisions.md. products_matched also carries the
+Migros/Coop/Lidl/Denner prices from Open Prices (M11, joined on EAN by openprices.py)
+and a Nutri-Score computed from the nutrition table where OFF has none (M12, nutriscore.py).
 """
 from __future__ import annotations
 
@@ -26,6 +27,7 @@ from pathlib import Path
 import duckdb
 from rapidfuzz import fuzz
 
+from nutriscore import add_nutriscore
 from scraping import _write_parquet
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -441,7 +443,12 @@ def main() -> None:
     matches = match_shop("aldi", aldi, off_aldi) + match_shop("volg", volg, off)
     _write_parquet(matches, PROCESSED_DIR / "matches.parquet")
     _to_csv("matches")
-    _write_parquet(combine(aldi, volg, matches, off_aldi), PROCESSED_DIR / "products_matched.parquet")
+    combined = combine(aldi, volg, matches, off_aldi)
+    # M12: Nutri-Score computed where OFF has none (nutriscore.py, docs/nutriscore_decisions.md)
+    ingredients = {("aldi", str(r["sku"])): details.get(r["sku"]) for r in aldi}
+    ingredients |= {("volg", str(r["product_id"])): r["ingredients"] for r in volg}
+    add_nutriscore(combined, ingredients)
+    _write_parquet(combined, PROCESSED_DIR / "products_matched.parquet")
     _to_csv("products_matched")
     write_review_sample(matches)
     if OFF_EXT_PATH.exists():

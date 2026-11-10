@@ -5,7 +5,7 @@ Script: [`src/matching.py`](../src/matching.py) · Resultados en
 `data/processed/products_matched.parquet` (un registro por producto: precio + nutrición).
 Muestra de revisión manual: `data/processed/match_review_sample.csv`.
 
-Los identificadores (M1…M11) aparecen como comentarios en el código. Los candidatos OFF
+Los identificadores (M1…M12) aparecen como comentarios en el código. Los candidatos OFF
 son el subconjunto suizo limpio y, solo para Aldi, las fichas alemanas y austriacas de
 las marcas que vende Aldi (E6 de [`off_cleaning_decisions.md`](off_cleaning_decisions.md)).
 
@@ -179,6 +179,11 @@ completo y de una sola fecha. Las filas de Aldi y Volgshop no cambian.
 
 15 EAN aparecen en más de una cadena, lo que permite comparar precios del mismo producto
 entre cadenas, aunque en una muestra pequeña.
+
+**M12. Nutri-Score calculado donde OFF no lo tiene.** Al construir `products_matched` se
+calcula el Nutri-Score 2023 a partir de la tabla nutricional (`nutriscore.py`). El grado de
+OFF tiene prioridad. Con esto, los productos con Nutri-Score pasan de 706 a 1 064. Reglas
+y validación en [`nutriscore_decisions.md`](nutriscore_decisions.md).
 
 ## Limitaciones
 
