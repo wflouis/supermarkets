@@ -1,318 +1,316 @@
-# Open Food Facts: decisiones de extracción, filtrado y limpieza
+# Open Food Facts: extraction, filtering and cleaning decisions
 
-Script: [`src/openfoodfacts.py`](../src/openfoodfacts.py) · Conteos reproducibles en
+Script: [`src/openfoodfacts.py`](../src/openfoodfacts.py) · Reproducible counts in
 [`data/processed/off_ch_cleaning_log.csv`](../data/processed/off_ch_cleaning_log.csv) ·
-Procedencia del snapshot en [`data/processed/off_ch_metadata.json`](../data/processed/off_ch_metadata.json)
+Snapshot provenance in [`data/processed/off_ch_metadata.json`](../data/processed/off_ch_metadata.json)
 
-Los identificadores (E1, F1, C1, N1…) aparecen como comentarios en el código, así que
-cada regla se puede rastrear hasta la línea que la implementa.
+The identifiers (E1, F1, C1, N1…) appear as comments in the code, so every rule can be
+traced to the line that implements it.
 
-- **E**: extracción, es decir, qué se descarga y qué entra al subconjunto suizo.
-- **F**: filtros que **eliminan filas**.
-- **C**: limpieza y transformaciones que **no eliminan filas**.
-- **N**: cosas que deliberadamente **no** se hicieron.
+- **E**: extraction, i.e. what is downloaded and what enters the Swiss subset.
+- **F**: filters that **remove rows**.
+- **C**: cleaning and transformations that **do not remove rows**.
+- **N**: things that were deliberately **not** done.
 
-## Resumen del embudo
+## Funnel summary
 
-Snapshot del export descargado el 2026-11-02.
+Snapshot of the export downloaded on 2026-11-02.
 
-| Regla | Qué elimina | Eliminadas | Quedan |
+| Rule | What it removes | Removed | Remaining |
 |---|---|---:|---:|
-| E3 | Productos no etiquetados como vendidos en Suiza | ~4.78 M | 107 342 |
-| F1 | Código que no es un EAN-8/EAN-13 válido | 1 775 | 105 567 |
-| F2 | Código duplicado | 1 | 105 566 |
-| F3 | Bebidas alcohólicas | 1 818 | 103 748 |
-| F4 | Alimentos infantiles | 290 | 103 458 |
-| F5 | No alimentos | 117 | 103 341 |
-| F6 | Tabla nutricional incompleta | 29 025 | 74 316 |
-| F7a | Nutriente fuera de 0–100 g | 25 | 74 291 |
-| F7b | Energía fuera de 0–3800 kJ | 4 | 74 287 |
-| F7c | Grasa saturada > grasa, o azúcares > carbohidratos | 123 | 74 164 |
-| F7d | Suma de macronutrientes > 105 g | 230 | 73 934 |
-| F7e | Energía inconsistente | 196 | **73 738** |
+| E3 | Products not tagged as sold in Switzerland | ~4.78 M | 107 342 |
+| F1 | Code that is not a valid EAN-8/EAN-13 | 1 775 | 105 567 |
+| F2 | Duplicate code | 1 | 105 566 |
+| F3 | Alcoholic beverages | 1 818 | 103 748 |
+| F4 | Baby food | 290 | 103 458 |
+| F5 | Non-food | 117 | 103 341 |
+| F6 | Incomplete nutrition table | 29 025 | 74 316 |
+| F7a | Nutrient outside 0–100 g | 25 | 74 291 |
+| F7b | Energy outside 0–3800 kJ | 4 | 74 287 |
+| F7c | Saturated fat > fat, or sugars > carbohydrates | 123 | 74 164 |
+| F7d | Sum of macronutrients > 105 g | 230 | 73 934 |
+| F7e | Inconsistent energy | 196 | **73 738** |
 
-De los 73 738 productos finales, 42 230 tienen Nutri-Score A–E; 12 534 se pueden
-asignar a Migros (7 185 con Nutri-Score) y 9 561 a Coop (5 873 con Nutri-Score).
+Of the 73 738 final products, 42 230 have a Nutri-Score A–E; 12 534 can be attributed to
+Migros (7 185 with a Nutri-Score) and 9 561 to Coop (5 873 with a Nutri-Score).
 
 ---
 
-## E. Extracción
+## E. Extraction
 
-**E1. Fuente: el export CSV completo de OFF, no la API ni el parquet de Hugging Face.**
+**E1. Source: the full OFF CSV export, not the API or the Hugging Face parquet.**
 URL: `static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz` (~1.5 GB).
-*Justificación:* la API de búsqueda devuelve como máximo 100 productos por página y
-limitó nuestras peticiones (503 y luego 401), así que no permite obtener ~100 000 productos.
-El parquet de Hugging Face pesa ~8 GB y también limitaba las lecturas parciales. El CSV es
-el volcado oficial y completo, se descarga con una sola petición y es lo que OFF recomienda
-para uso masivo. La descarga se identifica con un User-Agent que nombra el proyecto, como
-pide OFF.
+*Rationale:* the search API returns at most 100 products per page and rate-limited our
+requests (503, then 401), so it cannot deliver ~100 000 products. The Hugging Face parquet
+is ~8 GB and also rate-limited partial reads. The CSV is the official full dump, is
+downloaded with a single request and is what OFF recommends for bulk use. The download
+identifies itself with a User-Agent naming the project, as OFF asks.
 
-**E2. Solo se conservan 37 de las ~210 columnas.**
-Se guardan identificador, nombre, marca, cantidad, tiendas, categorías, Nutri-Score, NOVA,
-origen, etiquetas, los nutrientes por 100 g que usa el análisis y metadatos de calidad.
-*Justificación:* las demás columnas (imágenes, URLs, aditivos, vitaminas y minerales,
-ácidos grasos específicos, alérgenos) no intervienen en ninguna hipótesis. Quitarlas
-reduce el archivo de 1.5 GB a 9 MB, lo que permite versionarlo en git.
+**E2. Only 37 of the ~210 columns are kept.**
+Kept: identifier, name, brand, quantity, stores, categories, Nutri-Score, NOVA, origin,
+labels, the per-100 g nutrients used in the analysis and quality metadata.
+*Rationale:* the other columns (images, URLs, additives, vitamins and minerals, specific
+fatty acids, allergens) play no role in any hypothesis. Dropping them shrinks the file
+from 1.5 GB to 9 MB, small enough to version in git.
 
-**E3. Filtro de país: `countries_tags` contiene `en:switzerland`.**
-*Justificación:* la pregunta de investigación trata del mercado suizo. Se compara contra
-la etiqueta normalizada (`en:switzerland`) y no contra el texto libre `countries`, que
-mezcla idiomas ("Suisse", "Schweiz", "Svizzera"). Se usa coincidencia exacta del tag
-dentro de la lista, no `LIKE`, para no capturar subcadenas.
-*Nota:* 21 248 de los productos finales también están etiquetados en otros países. No se
-excluyen, porque un producto vendido en Suiza y en Alemania sigue siendo un producto
-suizo para nuestro análisis.
+**E3. Country filter: `countries_tags` contains `en:switzerland`.**
+*Rationale:* the research question is about the Swiss market. The normalised tag
+(`en:switzerland`) is used, not the free-text `countries` field, which mixes languages
+("Suisse", "Schweiz", "Svizzera"). The tag is matched exactly within the list, not with
+`LIKE`, so substrings are not captured.
+*Note:* 21 248 of the final products are also tagged in other countries. They are kept: a
+product sold in Switzerland and Germany is still a Swiss product for our analysis.
 
-**E4. Todo se lee como texto y el tipado se hace después.**
-El CSV usa tabulador como separador y no usa comillas (`quote=''`).
-*Justificación:* si DuckDB adivinara los tipos, una sola fila mal formada podría descartar
-o corromper una columna entera. Con `quote=''` se evita que una comilla suelta dentro de un
-nombre de producto "se trague" las líneas siguientes. Las filas que no se pueden parsear
-se registran con `store_rejects`; en este snapshot fueron 0 de 4.89 M líneas.
+**E4. Everything is read as text; typing happens later.**
+The CSV is tab-separated and unquoted (`quote=''`).
+*Rationale:* if DuckDB guessed types, one malformed row could drop or corrupt a whole
+column. `quote=''` stops a stray quote inside a product name from "swallowing" the
+following lines. Unparseable rows are logged with `store_rejects`; in this snapshot there
+were 0 out of 4.89 M lines.
 
-**E5. El subconjunto suizo crudo (`data/raw/off_ch_raw.parquet`) se versiona en git.
-El CSV de 1.5 GB no.**
-*Justificación:* OFF se edita a diario, así que volver a descargar no reproduce los mismos
-datos. Versionar el extracto congela el snapshot que usamos. El CSV completo supera el
-límite de 100 MB de GitHub. El SHA-256 del extracto queda guardado en el JSON de metadatos.
+**E5. The raw Swiss subset (`data/raw/off_ch_raw.parquet`) is versioned in git. The
+1.5 GB CSV is not.**
+*Rationale:* OFF is edited daily, so downloading again does not reproduce the same data.
+Versioning the extract freezes the snapshot we used. The full CSV exceeds GitHub's 100 MB
+limit. The extract's SHA-256 is stored in the metadata JSON.
 
-**E6. Extensión para Aldi: fichas de Alemania y Austria** (`python src/openfoodfacts.py
+**E6. Aldi extension: German and Austrian entries** (`python src/openfoodfacts.py
 aldi-ext`, `data/raw/off_aldi_ext_raw.parquet`).
-Del export descargado el 2026-11-03 se extraen los productos **no** etiquetados en Suiza
-y etiquetados en Alemania o Austria (`en:germany`, `en:austria`), cuya marca es una de
-las que vende Aldi Suisse (una entrada completa de `brands`, sin marcas genéricas como
-"Bio") o cuya tienda menciona Aldi u Hofer. Se extraen las mismas 37 columnas, y se limpian
-con exactamente las mismas reglas F1–F7 y C1–C12 que el subconjunto suizo: de 23 824
-filas quedan 15 162 (`off_aldi_ext_cleaning_log.csv`, `off_aldi_ext_clean.parquet`).
-*Justificación:* muchas marcas propias de Aldi Suisse son las de Aldi Süd y Hofer, y sin
-este paso solo se emparejaba el 6.5 % del surtido de Aldi. Que una ficha alemana sirva
-como sustituto se comprobó en M10 de [`matching_decisions.md`](matching_decisions.md).
-Este extracto viene de un snapshot más nuevo que el suizo (2026-11-02). El subconjunto
-suizo **no** se reextrajo, para no cambiar los datos de los que dependen los pasos ya
-hechos.
+From the export downloaded on 2026-11-03, products **not** tagged Switzerland but tagged
+Germany or Austria (`en:germany`, `en:austria`) are extracted when their brand is one Aldi
+Suisse sells (a whole `brands` entry, excluding generic brands such as "Bio") or their
+store mentions Aldi or Hofer. The same 37 columns are extracted and cleaned with exactly
+the same rules F1–F7 and C1–C12 as the Swiss subset: 23 824 rows become 15 162
+(`off_aldi_ext_cleaning_log.csv`, `off_aldi_ext_clean.parquet`).
+*Rationale:* many Aldi Suisse own brands are the same as Aldi Süd's and Hofer's, and
+without this step only 6.5 % of Aldi's range was matched. That a German entry can stand in
+for the Swiss product is checked in M10 of [`matching_decisions.md`](matching_decisions.md).
+This extract comes from a newer snapshot than the Swiss one (2026-11-02). The Swiss subset
+was **not** re-extracted, so the data that earlier steps depend on did not change.
 
-**E7. Ingredientes** (`data/raw/off_ingredients.parquet`). `ingredients_text` para todos los
-códigos de los extractos suizo y de E6, del mismo snapshot que E6. Se usa solo para
-confirmar o vetar matches (M9). El export no tiene una columna de idioma; el alemán se
-detecta en `matching.py`. Las procedencias (URL, fecha de descarga, SHA-256) están en
-`off_ch_metadata.json`, bajo `aldi_extension`.
+**E7. Ingredients** (`data/raw/off_ingredients.parquet`). `ingredients_text` for every code
+in the Swiss and E6 extracts, from the same snapshot as E6. Used only to confirm or veto
+matches (M9) and to detect sweeteners in the Nutri-Score validation. The export has no language
+column; German is detected in `matching.py`. Provenance (URL, download date, SHA-256) is in
+`off_ch_metadata.json` under `aldi_extension`.
 
-**E8. Extensión para Open Prices: fichas no suizas de productos con precio en Suiza**
+**E8. Open Prices extension: non-Swiss entries of products with a price in Switzerland**
 (`python src/openfoodfacts.py openprices-ext`, `data/raw/off_openprices_ext_raw.parquet`).
-De los EAN con un precio en una tienda suiza en Open Prices
-([`openprices_decisions.md`](openprices_decisions.md)), 177 no están en el extracto suizo.
-Del export del 2026-11-03 se toman sus fichas de cualquier país (137 encontradas) y se
-limpian con las mismas reglas F1–F7 y C1–C12: quedan 105
-(`off_openprices_ext_cleaning_log.csv`). *Justificación:* el precio prueba que el producto se
-vende en Suiza, y el EAN identifica el producto exacto. A diferencia de E6, no hay que
-suponer que una ficha de otro país describe un producto con el mismo nombre. Procedencia
-en `off_ch_metadata.json`, bajo `openprices_extension`.
+Of the EANs with a price in a Swiss shop on Open Prices
+([`openprices_decisions.md`](openprices_decisions.md)), 177 are not in the Swiss extract.
+Their entries from any country are taken from the 2026-11-03 export (137 found) and
+cleaned with the same rules F1–F7 and C1–C12: 105 remain
+(`off_openprices_ext_cleaning_log.csv`). *Rationale:* the price proves the product is sold
+in Switzerland, and the EAN identifies the exact product. Unlike E6, there is no need to
+assume that an entry from another country describes a product with the same name.
+Provenance in `off_ch_metadata.json` under `openprices_extension`.
 
-## F. Filtros (eliminan filas)
+## F. Filters (remove rows)
 
-**F1. El código debe ser un EAN-8 o EAN-13 válido, con dígito verificador correcto.**
-Antes de validar se normaliza: UPC-A de 12 dígitos → se antepone `0`; GTIN-14 que empieza
-con `0` → se quita ese `0` (ver C3).
-- Se eliminan 889 códigos de longitud no estándar. La mayoría son de 24 dígitos, como
-  `2776108499298…000260`: son etiquetas de báscula de Coop/Migros que llevan el precio o
-  el peso codificado, así que el mismo producto genera un código distinto en cada paquete.
-- Se eliminan 886 códigos con dígito verificador inválido, lo que indica errores de
-  captura o de lectura del escáner.
+**F1. The code must be a valid EAN-8 or EAN-13 with a correct check digit.**
+Codes are normalised first: a 12-digit UPC-A gets a leading `0`; a GTIN-14 starting with
+`0` loses it (see C3).
+- 889 codes of non-standard length are removed. Most have 24 digits, such as
+  `2776108499298…000260`: these are Coop/Migros scale labels that encode the price or
+  weight, so the same product gets a different code on every pack.
+- 886 codes with an invalid check digit are removed, which points to typing or scanner
+  errors.
 
-*Justificación:* el EAN es la llave principal para unir OFF con los datos de las tiendas
-(paso 1 del matching). Un código inválido no puede unirse por EAN y probablemente
-identifica mal al producto.
+*Rationale:* the EAN is the main key for joining OFF to the retailer data. An invalid code
+cannot be joined by EAN and probably misidentifies the product.
 
-**F2. Códigos duplicados: se conserva la entrada modificada más recientemente.**
-Solo había 1 caso (`7613269480952`, "Croquets").
-*Justificación:* el código debe ser llave primaria en la base de datos. La versión más
-reciente refleja las correcciones de la comunidad.
+**F2. Duplicate codes: the most recently modified entry is kept.**
+There was only 1 case (`7613269480952`, "Croquets").
+*Rationale:* the code must be a primary key in the database. The most recent version
+carries the community's corrections.
 
-**F3. Se excluyen las bebidas alcohólicas (`en:alcoholic-beverages`).**
-*Justificación:* el Nutri-Score no se calcula para el alcohol, y su precio en Suiza depende
-sobre todo de impuestos especiales (Alkoholsteuer), no de su calidad nutricional. Incluirlas
-mezclaría un efecto fiscal con la "prima de salud" que queremos medir.
+**F3. Alcoholic beverages are excluded (`en:alcoholic-beverages`).**
+*Rationale:* no Nutri-Score is computed for alcohol, and its price in Switzerland depends
+mainly on excise duty (Alkoholsteuer), not on nutritional quality. Including it would mix
+a tax effect into the "health premium" we want to measure.
 
-**F4. Se excluyen los alimentos infantiles** (categorías `en:baby-foods`, `en:baby-milks`,
-`en:infant…` o grupo PNNS "Baby foods").
-*Justificación:* tienen su propia regulación de composición, no reciben Nutri-Score, y su
-perfil nutricional responde a necesidades de bebés, no de adultos.
+**F4. Baby food is excluded** (categories `en:baby-foods`, `en:baby-milks`, `en:infant…`
+or PNNS group "Baby foods").
+*Rationale:* it has its own composition rules, gets no Nutri-Score, and its nutritional
+profile serves babies' needs, not adults'.
 
-**F5. Se excluyen los no alimentos** (comida para mascotas, cosméticos, productos de hogar
-que se colaron en OFF).
-*Justificación:* están fuera del alcance del estudio y sus valores nutricionales no tienen
-sentido.
+**F5. Non-food is excluded** (pet food, cosmetics, household products that slipped into
+OFF).
+*Rationale:* out of scope, and their nutrition values are meaningless.
 
-**F6. Se exigen los 6 nutrientes principales por 100 g: energía, grasa, grasa saturada,
-azúcares, proteína y sal.** Es el filtro que más filas elimina (29 025).
-*Justificación:* son las variables del clustering (k-means) y de la regresión, y los
-insumos del Nutri-Score. Un producto sin ellos no aporta nada a la pregunta de
-investigación. No se imputan (ver N2).
-- La fibra **no** se exige, porque falta en el 46 % de los productos que quedan (en la UE
-  no es obligatoria en la etiqueta). Exigirla eliminaría la mitad de la muestra.
-- Los carbohidratos tampoco se exigen; solo faltan en 20 filas.
-- *Efecto secundario:* este filtro también elimina casi todas las entradas no editadas
-  desde 2025 o antes, que en el export no traen nutrientes (son fichas viejas incompletas).
-  Por eso el dataset final es, en la práctica, de entradas revisadas en 2024–2026.
+**F6. All 6 core nutrients per 100 g are required: energy, fat, saturated fat, sugars,
+protein and salt.** This filter removes the most rows (29 025).
+*Rationale:* they are the variables of the clustering (k-means) and the regression, and the
+inputs of the Nutri-Score. A product without them contributes nothing to the research
+question. They are not imputed (see N2).
+- Fibre is **not** required: it is missing for 46 % of the remaining products (it is not
+  mandatory on EU labels). Requiring it would remove half the sample.
+- Carbohydrates are not required either; they are missing in only 20 rows.
+- *Side effect:* this filter also removes almost all entries not edited since 2025 or
+  earlier, which come without nutrients in the export (old, incomplete entries). The final
+  dataset is therefore, in practice, entries reviewed in 2024–2026.
 
-**F7. Se eliminan tablas nutricionales físicamente imposibles o internamente
-inconsistentes.**
-Se elimina la fila completa y no solo el valor: el Nutri-Score de OFF se calcula con esos
-mismos números, así que si la tabla está mal, la calificación también.
-- **F7a** (25 filas): cualquier nutriente en gramos < 0 o > 100 g por 100 g. Es imposible
-  por definición. Ejemplos reales: grasa = 2800, sal = 97 500, que son errores de unidad.
-- **F7b** (4 filas): energía > 3800 kJ/100 g. La grasa pura aporta ~3700 kJ, que es el
-  máximo físico de un alimento; se deja un 3 % de margen.
-- **F7c** (123 filas): grasa saturada > grasa o azúcares > carbohidratos. Una parte no
-  puede ser mayor que el total. Se tolera 0.5 g por el redondeo de las etiquetas.
-- **F7d** (230 filas): grasa + carbohidratos + fibra + proteína + sal > 105 g. Más de
-  100 g de componentes en 100 g de producto es imposible; el margen de 5 g es el mismo
-  umbral que usa OFF en su propia verificación de calidad.
-- **F7e** (196 filas): energía inconsistente. Cuando los kJ y las kcal declarados no
-  cuadran (kJ/kcal fuera de 3.6–4.8 en productos con más de 40 kcal), se compara el kJ
-  con la energía calculada a partir de los macronutrientes (grasa 37, carbohidratos 17,
-  proteína 17 y fibra 8 kJ/g). La fila solo se elimina si el kJ también falla por más
-  del 20 %.
-  *Justificación:* de 3 742 casos con kJ/kcal discordantes, en el 93 % el kJ coincide con
-  los macros y lo que está mal son las kcal (típicamente kcal capturadas como kJ, ratio
-  ≈ 1.0). Eliminarlos todos habría tirado 2 900 productos válidos. Como usamos los kJ
-  (C5), basta con que los kJ sean confiables. El umbral de 40 kcal evita falsos
-  positivos por redondeo en productos casi sin energía, como bebidas light o especias.
+**F7. Physically impossible or internally inconsistent nutrition tables are removed.**
+The whole row is removed, not just the value: OFF computes the Nutri-Score from the same
+numbers, so if the table is wrong, so is the grade.
+- **F7a** (25 rows): any nutrient in grams < 0 or > 100 g per 100 g. Impossible by
+  definition. Real examples: fat = 2800, salt = 97 500, which are unit errors.
+- **F7b** (4 rows): energy > 3800 kJ/100 g. Pure fat gives ~3700 kJ, the physical maximum
+  for a food; 3 % margin.
+- **F7c** (123 rows): saturated fat > fat or sugars > carbohydrates. A part cannot exceed
+  its total. 0.5 g tolerance for label rounding.
+- **F7d** (230 rows): fat + carbohydrates + fibre + protein + salt > 105 g. More than
+  100 g of components in 100 g of product is impossible; the 5 g margin is the threshold
+  OFF uses in its own quality check.
+- **F7e** (196 rows): inconsistent energy. When the declared kJ and kcal disagree (kJ/kcal
+  outside 3.6–4.8 in products above 40 kcal), the kJ value is compared with the energy
+  computed from the macronutrients (fat 37, carbohydrates 17, protein 17 and fibre
+  8 kJ/g). The row is removed only if the kJ value is also off by more than 20 %.
+  *Rationale:* of 3 742 cases with disagreeing kJ/kcal, in 93 % the kJ value matches the
+  macros and the kcal value is the wrong one (typically kcal entered as kJ, ratio ≈ 1.0).
+  Removing them all would have discarded 2 900 valid products. Since kJ is what we use
+  (C5), it is enough that kJ is reliable. The 40 kcal threshold avoids false positives
+  from rounding in products with almost no energy, such as light drinks or spices.
 
-## C. Limpieza y transformaciones (no eliminan filas)
+## C. Cleaning and transformations (do not remove rows)
 
-**C1. Tipado.** Los nutrientes, la cantidad, la completitud y los escaneos pasan a número
-con `try_cast`, que convierte en NULL lo que no sea numérico en lugar de fallar. Las
-fechas pasan de epoch a `TIMESTAMP` en UTC.
-*Justificación:* cuando un valor no es numérico es mejor perder ese valor que perder el
-proceso completo.
+**C1. Typing.** Nutrients, quantity, completeness and scans are cast to numbers with
+`try_cast`, which turns non-numeric values into NULL instead of failing. Dates go from
+epoch to `TIMESTAMP` in UTC.
+*Rationale:* losing a single non-numeric value is better than losing the whole run.
 
-**C2. Texto:** se recortan los espacios, se colapsan los espacios múltiples y una cadena
-vacía se convierte en NULL (nombre, nombre genérico, marcas, cantidad, tiendas).
-*Justificación:* así el matching por nombre (paso 2) no falla por espacios invisibles, y
-"vacío" y "desconocido" significan lo mismo.
+**C2. Text:** spaces are trimmed, repeated spaces collapsed and an empty string becomes
+NULL (name, generic name, brands, quantity, stores).
+*Rationale:* name matching does not fail on invisible spaces, and "empty" and "unknown"
+mean the same.
 
-**C3. Normalización de códigos a EAN-13/EAN-8.** El valor original se conserva en
-`code_raw`.
-*Justificación:* las tiendas suelen publicar EAN-13. Sin normalizar, un UPC de 12 dígitos
-no uniría con su equivalente de 13.
+**C3. Codes normalised to EAN-13/EAN-8.** The original value is kept in `code_raw`.
+*Rationale:* shops usually publish EAN-13. Without normalisation a 12-digit UPC would not
+join its 13-digit equivalent.
 
-**C4. Nutri-Score y NOVA:** solo se aceptan `a`–`e` y `1`–`4`. "unknown" y
-"not-applicable" se convierten en NULL. `nutriscore_score` se pone en NULL cuando no hay
-calificación válida. Se agrega `has_nutriscore` para filtrar fácilmente.
-*Justificación:* los valores centinela como cadena se colarían como una categoría más en
-un `GROUP BY` o en una prueba chi-cuadrada.
+**C4. Nutri-Score and NOVA:** only `a`–`e` and `1`–`4` are accepted. "unknown" and
+"not-applicable" become NULL. `nutriscore_score` is set to NULL when there is no valid
+grade. `has_nutriscore` is added for easy filtering.
+*Rationale:* sentinel strings would otherwise slip in as one more category in a
+`GROUP BY` or a chi-squared test.
 
-**C5. Energía en kJ.** Se usa el kJ declarado y, si falta, kcal × 4.184. Las columnas de
-energía declarada se descartan después de F7e.
-*Justificación:* el Nutri-Score usa kJ y es la unidad de la etiqueta en Suiza y la UE.
-Una sola columna de energía evita colinealidad en la regresión.
-- Se usa **sal** y no sodio: en OFF uno se calcula a partir del otro (sal = sodio × 2.5),
-  así que el sodio es redundante.
+**C5. Energy in kJ.** The declared kJ value is used, and kcal × 4.184 if it is missing. The
+declared energy columns are dropped after F7e.
+*Rationale:* the Nutri-Score uses kJ, which is the label unit in Switzerland and the EU. A
+single energy column avoids collinearity in the regression.
+- **Salt** is used, not sodium: in OFF one is computed from the other (salt = sodium ×
+  2.5), so sodium is redundant.
 
-**C6. Tamaño del envase (`product_quantity`).** Se pone en NULL si es ≤ 0 g o > 10 kg, y
-se agrega `product_quantity_unit` (`ml` si el texto de cantidad indica ml/cl/dl/l; `g` en
-los demás casos).
-*Justificación:* hay 197 valores de 0, que vienen de textos como "1pcs" o "25 sachets", y
-17 mayores a 10 kg ("1000 kg", "100 x 550 g"), que son formatos mayoristas y no de
-supermercado. Se pone NULL en lugar de eliminar la fila porque el tamaño puede venir de
-la tienda al hacer el matching. La unidad importa porque "por 100 g" y "por 100 ml" no
-son comparables sin densidad. OFF ya convierte litros a ml y kg a g en
-`product_quantity` (verificado: "1.5L" → 1500, "150 cl" → 1500).
+**C6. Package size (`product_quantity`).** Set to NULL if ≤ 0 g or > 10 kg, and
+`product_quantity_unit` is added (`ml` if the quantity text indicates ml/cl/dl/l, `g`
+otherwise).
+*Rationale:* there are 197 zeros, from texts such as "1pcs" or "25 sachets", and 17 values
+above 10 kg ("1000 kg", "100 x 550 g"), which are wholesale formats, not supermarket ones.
+NULL is used instead of removing the row because the size can come from the shop during
+matching. The unit matters because "per 100 g" and "per 100 ml" are not comparable without
+a density. OFF already converts litres to ml and kg to g in `product_quantity` (checked:
+"1.5L" → 1500, "150 cl" → 1500).
 
-**C7. Marca principal (`brand_main`):** la primera marca de la lista, en minúsculas, con
-guiones convertidos a espacios. `brands` se conserva completo.
-*Justificación:* sirve para el matching difuso (marca + nombre) y unifica variantes como
-"M-Classic", "M Classic" y "m-classic".
+**C7. Main brand (`brand_main`):** the first brand in the list, lower-case, hyphens turned
+into spaces. `brands` is kept in full.
+*Rationale:* used for fuzzy matching (brand + name); unifies variants such as "M-Classic",
+"M Classic" and "m-classic".
 
-**C8. `code_is_internal`:** EAN-13 que empieza con `2` (rango GS1 de circulación
-restringida). Son 9 707 productos y **no se eliminan**.
-*Justificación:* son códigos internos de tienda (Migros los usa en productos frescos y de
-panadería, con prefijo 21). No son únicos a nivel global, pero sí dentro de la cadena que
-los emite, así que todavía pueden unirse con los datos de esa cadena. La bandera permite
-excluirlos si el matching produce colisiones.
+**C8. `code_is_internal`:** EAN-13 starting with `2` (GS1 restricted-circulation range).
+10 265 products, **not removed**.
+*Rationale:* these are in-store codes (Migros uses them for fresh and bakery products,
+prefix 21). They are not globally unique but are unique within the chain that issues them,
+so they can still be joined with that chain's data. The flag allows excluding them if
+matching produces collisions.
 
-**C9. Cadena minorista (`at_migros`, `at_coop`, `at_denner`, `at_aldi`, `at_lidl`,
-`at_volg`).** Hay dos fuentes de evidencia y se guardan por separado (`store_*` y
-`own_brand_*`); `at_*` es la unión de ambas.
-1. **Campo `stores`** (texto libre): se usan patrones explícitos por cadena. Se incluyen
-   los formatos del mismo grupo (migrolino, Coop Pronto, Coop City) y se excluyen
-   "Aldi Süd"/"Aldi Nord" (Alemania), "Biocoop" (cadena francesa) y "coopérative".
-2. **Marca propia exclusiva**: M-Classic, M-Budget, Migros Bio, Migros Sélection,
-   Anna's Best, V-Love, TerraSuisse y Optigal → Migros. Naturaplan, Prix Garantie,
-   Qualité & Prix, Karma, Betty Bossi, Fine Food y Naturafarm → Coop. Denner → Denner.
-   Volg → Volg.
+**C9. Retail chain (`at_migros`, `at_coop`, `at_denner`, `at_aldi`, `at_lidl`,
+`at_volg`).** There are two sources of evidence, stored separately (`store_*` and
+`own_brand_*`); `at_*` is their union.
+1. **`stores` field** (free text): explicit patterns per chain. Formats of the same group
+   are included (migrolino, Coop Pronto, Coop City); "Aldi Süd"/"Aldi Nord" (Germany),
+   "Biocoop" (a French chain) and "coopérative" are excluded.
+2. **Exclusive own brand**: M-Classic, M-Budget, Migros Bio, Migros Sélection, Anna's
+   Best, V-Love, TerraSuisse and Optigal → Migros. Naturaplan, Prix Garantie, Qualité &
+   Prix, Karma, Betty Bossi, Fine Food and Naturafarm → Coop. Denner → Denner. Volg → Volg.
 
-*Justificación:* `stores` solo está lleno en el 14 % de las fichas. Con la marca propia,
-Migros pasa de 8 003 a 12 534 productos y Coop de 1 686 a 9 561. Las marcas propias
-solo se venden en su cadena, así que la inferencia es casi segura.
-*Decisiones conservadoras:*
-- **No** se incluyen marcas industriales de Migros (Frey, Jowa, Midor, Bischofszell) porque
-  también producen para terceros y se venden en otros canales.
-- Para Aldi y Lidl solo se usa `stores`, porque sus marcas (Milbona, Milfina…) se venden
-  igual en Alemania y Austria y no prueban que el producto esté en la tienda suiza.
-- **Limitación:** `at_* = false` significa "sin evidencia", no "no se vende ahí".
+*Rationale:* `stores` is filled in only 14 % of the entries. With own brands, Migros grows
+from 8 003 to 12 534 products and Coop from 1 686 to 9 561. Own brands are sold only in
+their chain, so the inference is almost certain.
+*Conservative choices:*
+- Migros' industrial brands (Frey, Jowa, Midor, Bischofszell) are **not** included: they
+  also produce for third parties and are sold through other channels.
+- For Aldi and Lidl only `stores` is used, because their brands (Milbona, Milfina…) are
+  sold the same way in Germany and Austria and do not prove the product is in the Swiss
+  shop.
+- **Limitation:** `at_* = false` means "no evidence", not "not sold there". With this
+  rule Aldi has 338 products, Lidl 305 and Volg 186; prices for these chains come from
+  scraping (Aldi, Volgshop) or Open Prices (Lidl), not from this flag.
 
-**C10. `is_organic`:** la fila tiene `en:organic`, `en:eu-organic`, `en:bio-suisse` o un
-código de certificador bio (`en:xx-bio-NNN`).
-*Justificación:* la regresión incluye una variable de producto orgánico (README). OFF
-etiqueta lo bio de varias formas y se aceptan todas las que implican una certificación.
+**C10. `is_organic`:** the row has `en:organic`, `en:eu-organic`, `en:bio-suisse` or an
+organic certifier code (`en:xx-bio-NNN`).
+*Rationale:* the regression includes an organic flag. OFF tags organic products in
+several ways, and every tag implying certification is accepted.
 
-**C11. `origin_status`:** `domestic` si todos los orígenes son Suiza, `imported` si
-ninguno lo es, `mixed` si hay de ambos y NULL si no hay dato.
-*Justificación:* es la variable de H3 (prima por importación).
-*Decisiones:*
-- Se usa `origins_tags` (origen de los ingredientes) y no `manufacturing_places_tags`
-  (lugar de fabricación), porque son conceptos distintos. El lugar de fabricación se
-  conserva por si se necesita después.
-- **Limitación importante:** solo el 8 % de los productos finales tiene origen. H3
-  probablemente necesite el origen que publican las tiendas (Coop y Volg lo muestran).
+**C11. `origin_status`:** `domestic` if all origins are Switzerland, `imported` if none is,
+`mixed` if both occur and NULL if there is no data.
+*Rationale:* this is the H3 variable (import premium).
+*Decisions:*
+- `origins_tags` (origin of the ingredients) is used, not `manufacturing_places_tags`
+  (place of manufacture), because they are different concepts. The place of manufacture is
+  kept in case it is needed later.
+- **Important limitation:** only 8 % of the final products have an origin. Volgshop
+  publishes its own production country (C7 of
+  [`retail_cleaning_decisions.md`](retail_cleaning_decisions.md)), which measures a
+  different concept.
 
-**C12. Listas como listas.** Categorías, etiquetas, orígenes, lugares de fabricación y
-países se guardan como `LIST` en el parquet. En el CSV se unen con `|`.
-*Justificación:* así se puede filtrar por tag sin tener que analizar el texto con
-expresiones regulares. Se usa `|` y no `,` para no romper el separador del CSV.
+**C12. Lists as lists.** Categories, labels, origins, manufacturing places and countries
+are stored as `LIST` in the parquet. In the CSV they are joined with `|`.
+*Rationale:* this allows filtering by tag without parsing text with regular expressions.
+`|` is used instead of `,` so the CSV separator is not broken.
 
-## N. Lo que deliberadamente NO se hizo
+## N. What was deliberately NOT done
 
-**N1. No se recalcula el Nutri-Score; se usa el de OFF.**
-*Justificación:* OFF lo calcula con el algoritmo oficial vigente (versión 2023), que
-incluye la proporción de frutas, verduras y legumbres estimada a partir de los
-ingredientes, un dato que no tenemos limpio. Recalcularlo sería menos exacto.
+**N1. The Nutri-Score in this table is OFF's own; it is not recomputed here.**
+*Rationale:* OFF computes it with the current official algorithm (2023 version), including
+the fruit/vegetable/legume share estimated from the ingredients. A Nutri-Score is computed
+only later, in `products_matched`, for products that have a nutrition table but no OFF
+grade (M12 of [`matching_decisions.md`](matching_decisions.md),
+[`nutriscore_decisions.md`](nutriscore_decisions.md)).
 
-**N2. No se imputan nutrientes faltantes.**
-*Justificación:* imputar la variable que se quiere explicar o agrupar inventaría señal.
-La fibra (46 % faltante) se deja en NULL; si el modelo la necesita, la decisión se toma
-y documenta en el notebook de modelado.
+**N2. Missing nutrients are not imputed.**
+*Rationale:* imputing the variable we want to explain or cluster would invent signal.
+Fibre (46 % missing) stays NULL; if a model needs it, the decision is made and documented
+in the modelling notebook.
 
-**N3. No se filtra por antigüedad de la ficha.**
-*Justificación:* el 88 % del extracto suizo tiene fecha de modificación de 2026 por
-ediciones masivas automáticas de OFF, así que la fecha no indica qué tan reciente es la
-información de la etiqueta. En la práctica, F6 ya elimina las fichas viejas vacías.
+**N3. No filter on entry age.**
+*Rationale:* 88 % of the Swiss extract has a 2026 modification date because of OFF's
+automatic bulk edits, so the date says nothing about how recent the label information is.
+In practice F6 already removes the old, empty entries.
 
-**N4. No se eliminan productos sin cadena asignada.**
-*Justificación:* forman el universo para hacer matching por nombre con los productos
-scrapeados de Aldi y Volg, que no publican EAN. Restringir a productos con cadena
-conocida antes del matching perdería esos candidatos.
+**N4. Products without an assigned chain are not removed.**
+*Rationale:* they are the candidate pool for name matching with the scraped Aldi and Volg
+products, which have no EAN. Restricting to products with a known chain before matching
+would lose those candidates.
 
-**N5. No se eliminan productos sin Nutri-Score si tienen los nutrientes completos**
-(31 508 filas).
-*Justificación:* sirven para el clustering, que usa los nutrientes y no la calificación.
-H1 y H2 filtran con `has_nutriscore`.
+**N5. Products without a Nutri-Score are not removed if their nutrients are complete**
+(31 508 rows).
+*Rationale:* they are useful for clustering, which uses nutrients, not the grade. H1 and H2
+filter on the grade.
 
-**N6. No se deduplica por nombre o marca.**
-*Justificación:* un mismo producto en distintos tamaños tiene EAN y precio por 100 g
-distintos. Son SKUs diferentes y el precio por tamaño es parte de lo que se mide.
+**N6. No deduplication by name or brand.**
+*Rationale:* the same product in different sizes has different EANs and different prices
+per 100 g. They are different SKUs, and the price per size is part of what is measured.
 
-**N7. No se eliminan valores atípicos estadísticos** (por ejemplo, con z-score).
-*Justificación:* F7 elimina solo lo físicamente imposible. Un producto con 90 g de grasa
-(aceite) o 99 g de azúcar (azúcar de mesa) es extremo pero real, y esos extremos son
-justamente los productos que el Nutri-Score castiga.
+**N7. Statistical outliers are not removed** (for example by z-score).
+*Rationale:* F7 removes only the physically impossible. A product with 90 g of fat (oil) or
+99 g of sugar (table sugar) is extreme but real, and those extremes are exactly the
+products the Nutri-Score penalises.
 
-## Sesgos conocidos que estas decisiones no corrigen
+## Known biases these decisions do not correct
 
-- OFF lo alimenta una comunidad: las marcas grandes y las marcas propias de Migros/Coop
-  están mejor cubiertas que los productos frescos, a granel o de cadenas pequeñas.
-- La cobertura por cadena es muy desigual: Migros 12.5 k y Coop 9.6 k, contra Aldi 331,
-  Lidl 299 y Volg 181. Para estas cadenas los productos deben venir de nuestro scraping.
-- La asignación por cadena (C9) tiene falsos negativos por construcción.
+- OFF is fed by a community: big brands and the Migros/Coop own brands are better covered
+  than fresh, loose or small-chain products.
+- Coverage per chain is very uneven: Migros 12.5 k and Coop 9.6 k, against Aldi 338,
+  Lidl 305 and Volg 186. For these chains the products come from our scraping (Aldi,
+  Volgshop) or from Open Prices (Lidl).
+- The chain attribution (C9) has false negatives by construction.

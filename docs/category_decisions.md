@@ -1,29 +1,30 @@
-# Categoría común entre tiendas: decisiones
+# Common category across shops: decisions
 
-Script: [`src/categories.py`](../src/categories.py) · Se aplica en
-[`src/matching.py`](../src/matching.py) al construir `products_matched` (M13 de
-[`matching_decisions.md`](matching_decisions.md)) · Validación: `python src/categories.py validate`
+Script: [`src/categories.py`](../src/categories.py) · Applied in
+[`src/matching.py`](../src/matching.py) when `products_matched` is built (M13 of
+[`matching_decisions.md`](matching_decisions.md)) · Validation: `python src/categories.py validate`
 
-Los identificadores (K1, K2…) son propios de este documento.
+The identifiers (K1, K2…) belong to this document.
 
-## Por qué
+## Why
 
-H1 controla por categoría y H2 compara el sobreprecio entre cadenas dentro de cada
-categoría. Para eso cada producto necesita una categoría con el mismo significado en todas
-las tiendas. Las categorías propias no sirven para esto:
-- Aldi agrupa por sección de la tienda ("Vorräte", "Tiefgekühlte Produkte").
-- Volgshop mezcla tipos de alimento ("Milchprodukte, Eier & frische Fertiggerichte").
-- Migros, Coop, Lidl y Denner no tienen categoría propia (Open Prices no la trae).
+H1 controls for category, and H2 compares the premium across chains within each category.
+That needs a category that means the same in every shop. The shops' own categories do not
+work for this:
+- Aldi groups by shop section ("Vorräte", "Tiefgekühlte Produkte").
+- Volgshop mixes food types ("Milchprodukte, Eier & frische Fertiggerichte").
+- Migros, Coop, Lidl and Denner have no category of their own (Open Prices does not carry
+  one).
 
-La categoría PNNS de OFF sí es común a todas, pero solo existe para los productos
-emparejados: solo 95 de los 387 productos de Volgshop con Nutri-Score la tenían.
+OFF's PNNS category is common to all, but it only exists for matched products: only 95 of
+the 387 Volgshop products with a Nutri-Score had one.
 
-## Resultado
+## Result
 
-Entre los 1 064 productos con Nutri-Score, 1 045 (98 %) tienen categoría común: 666 de OFF,
-181 por la categoría de la tienda y 198 por el nombre.
+Of the 1 064 products with a Nutri-Score, 1 045 (98 %) have a common category: 666 from OFF,
+181 from the shop category and 198 from the name.
 
-| Categoría (PNNS grupo 1) | Aldi | Volg | Migros | Coop | Lidl | Denner | Total |
+| Category (PNNS group 1) | Aldi | Volg | Migros | Coop | Lidl | Denner | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Sugary snacks | 40 | 84 | 68 | 13 | 2 | 4 | 211 |
 | Cereals and potatoes | 43 | 58 | 43 | 28 | 7 | 1 | 180 |
@@ -34,74 +35,70 @@ Entre los 1 064 productos con Nutri-Score, 1 045 (98 %) tienen categoría común
 | Fruits and vegetables | 29 | 23 | 14 | 7 | 0 | 0 | 73 |
 | Salty snacks | 20 | 17 | 9 | 10 | 1 | 1 | 58 |
 | Composite foods | 22 | 13 | 12 | 9 | 1 | 0 | 57 |
-| Sin categoría | 8 | 1 | 5 | 4 | 0 | 1 | 19 |
+| No category | 8 | 1 | 5 | 4 | 0 | 1 | 19 |
 
-Columnas nuevas en `products_matched`:
-- `category_common`: la categoría para el análisis.
-- `category_common_source`: de dónde sale (`off`, `shop_category` o `name`).
-- `category_rules`: la categoría que dan las reglas, para todos los productos (sirve para
-  validar y para un análisis de sensibilidad).
+New columns in `products_matched`:
+- `category_common`: the category for the analysis.
+- `category_common_source`: where it comes from (`off`, `shop_category` or `name`).
+- `category_rules`: the category given by the rules, for every product (for validation and
+  sensitivity analysis).
 
 ---
 
-## K. Reglas
+## K. Rules
 
-**K1. Prioridad y nivel.** Si el producto tiene PNNS de OFF, se usa ese. Si no, se aplican
-las reglas K2–K4. Se usa el **grupo 1** (9 categorías) y no el grupo 2 (unas 40), para que
-cada celda cadena × categoría tenga productos suficientes.
+**K1. Priority and level.** If the product has an OFF PNNS group, it is used. Otherwise rules
+K2–K4 apply. **Group 1** (9 categories) is used rather than group 2 (about 40), so that every
+chain × category cell has enough products.
 
-**K2. Subcategorías homogéneas de la tienda deciden primero.** Por ejemplo "Softdrinks",
-"Käse", "Schokolade", "Müesli & Flakes", las de carne y las de fruta y verdura.
-*Justificación:* en la validación, todos sus productos emparejados tienen el mismo grupo
-PNNS. Además, el nombre engaña: en "Softdrinks", "Orange, Zero" es un refresco, no una
-fruta.
+**K2. Homogeneous shop sub-categories decide first,** e.g. "Softdrinks", "Käse",
+"Schokolade", "Müesli & Flakes", the meat and the fruit-and-vegetable ones.
+*Rationale:* in the validation, all their matched products have the same PNNS group. The name
+also misleads: in "Softdrinks", "Orange, Zero" is a soft drink, not a fruit.
 
-**K3. Palabras clave en el nombre** (alemán, francés e italiano, porque los nombres de OFF
-de Migros y Coop suelen estar en francés). Gana la primera regla que coincide. El orden
-sigue convenciones de PNNS que no son obvias, y que salieron de los errores de la primera
-versión:
-- Platos compuestos primero (pizza, lasaña, sándwich, fondue), porque contienen palabras
-  de todos los demás grupos.
-- Las sopas son "Fruits and vegetables".
-- Las legumbres y el tofu son "Cereals and potatoes", igual que las papas fritas de bolsa
-  (chips).
-- Las salsas, pestos, caldos y condimentos son "Fat and sauces", antes de las palabras de
-  verdura o carne que contienen ("Tomatensauce", "Burger sauce").
-- Los helados y los postres lácteos son "Milk and dairy products". El chocolate con leche es
-  "Sugary snacks", así que la regla de dulces va antes que la de lácteos.
-- Los frutos secos, las aceitunas y los pepinillos son "Salty snacks".
-- El maíz es "Cereals and potatoes".
+**K3. Name keywords** (German, French and Italian, because the OFF names of Migros and Coop
+products are often French). The first matching rule wins. The order follows PNNS conventions
+that are not obvious and that came out of the errors of the first version:
+- Composite dishes first (pizza, lasagne, sandwich, fondue), because they contain words of
+  every other group.
+- Soups are "Fruits and vegetables".
+- Legumes and tofu are "Cereals and potatoes", as are potato crisps.
+- Sauces, pestos, stocks and condiments are "Fat and sauces", ahead of the vegetable or meat
+  words they contain ("Tomatensauce", "Burger sauce").
+- Ice cream and dairy desserts are "Milk and dairy products". Milk chocolate is "Sugary
+  snacks", so the sweets rule comes before the dairy rule.
+- Nuts, olives and pickles are "Salty snacks".
+- Maize is "Cereals and potatoes".
 
-**K4. Cualquier otra subcategoría mapeada de la tienda**, si ninguna palabra clave coincide.
-Las subcategorías mixtas ("Konserven", "Backzutaten") no se mapean.
+**K4. Any other mapped shop sub-category,** if no keyword matches. Mixed sub-categories
+("Konserven", "Backzutaten") are not mapped.
 
-## V. Validación
+## V. Validation
 
-**V1. Contra el PNNS de OFF**, en los productos que tienen ambos:
+**V1. Against OFF's PNNS group**, on products that have both:
 
-| Cadena | Productos | Con categoría por reglas | Mismo grupo que OFF |
+| Chain | Products | With a rule category | Same group as OFF |
 |---|---:|---:|---:|
-| Volg (tienda + nombre) | 97 | 99 % | 93 % |
-| Aldi (tienda + nombre) | 202 | 93 % | 88 % |
-| Migros (solo nombre) | 217 | 71 % | 88 % |
-| Coop (solo nombre) | 119 | 77 % | 90 % |
-| Lidl (solo nombre) | 32 | 66 % | 86 % |
-| Todas las fichas suizas de OFF (solo nombre) | 39 791 | 67 % | 75 % |
+| Volg (shop + name) | 97 | 99 % | 93 % |
+| Aldi (shop + name) | 202 | 93 % | 88 % |
+| Migros (name only) | 217 | 71 % | 88 % |
+| Coop (name only) | 119 | 77 % | 90 % |
+| Lidl (name only) | 32 | 66 % | 86 % |
+| All Swiss OFF entries (name only) | 39 791 | 67 % | 75 % |
 
-**Ojo:** las reglas se ajustaron mirando los errores de las primeras cinco filas, así que
-esas cifras son optimistas. La última fila no se usó para ajustar y es la estimación más
-honesta para las reglas de nombre solas. Tiene nombres de todos los idiomas, muchos
-genéricos ("Classic", "Bio"). Las reglas de nombre solas solo se usan en 24 productos de
-Migros, Coop, Lidl y Denner. Los 289 de Volgshop también usan la subcategoría de la tienda.
+**Note:** the rules were tuned by looking at the errors in the first five rows, so those
+figures are optimistic. The last row was not used for tuning and is the more honest estimate
+for the name rules alone. It has names in every language, many of them generic ("Classic",
+"Bio"). The name rules alone are used for only 24 Migros, Coop, Lidl and Denner products. The
+289 Volgshop ones also use the shop sub-category.
 
-## Limitaciones
+## Limitations
 
-- **Celdas pequeñas.** Fuera de Aldi, Volgshop, Migros y Coop las celdas son demasiado
-  pequeñas para comparar categorías, y algunas de Coop también (Fish Meat Eggs 6, Fruits
-  and vegetables 7). H2 por categoría tendría que limitarse a las cuatro cadenas grandes, o
-  agrupar categorías.
-- **PNNS es la convención de OFF, no la única posible.** Que las papas fritas de bolsa estén
-  en "Cereals and potatoes" se ve raro, pero es lo que hace OFF con los 666 productos que
-  ya tienen PNNS, y mezclar convenciones sería peor.
-- **19 productos quedan sin categoría:** especias, vinagre y nombres de marca sin contexto
-  ("bueno", "Pancroc"). Quedan fuera de los modelos que controlan por categoría.
+- **Small cells.** Outside Aldi, Volgshop, Migros and Coop the cells are too small to compare
+  categories, and some Coop ones too (Fish Meat Eggs 6, Fruits and vegetables 7). H2 by
+  category should be limited to the four large chains, or merge categories.
+- **PNNS is OFF's convention, not the only possible one.** Potato crisps in "Cereals and
+  potatoes" looks odd, but it is what OFF does for the 666 products that already have a PNNS
+  group, and mixing conventions would be worse.
+- **19 products have no category:** spices, vinegar and brand names without context ("bueno",
+  "Pancroc"). They drop out of models that control for category.
