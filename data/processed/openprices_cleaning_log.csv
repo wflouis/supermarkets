@@ -1,0 +1,11 @@
+rule,description,rows_before,rows_removed,rows_after
+—,prices downloaded (currency CHF),,,1050
+F1,price of a product with EAN (not a loose-produce category price),1050,4,1046
+F2,shop in Switzerland,1046,102,944
+F3,shop belongs to a Swiss grocery chain,944,70,874
+F4,"regular price, not a promotion",874,70,804
+F5,"price per item, not per kg of loose goods",804,0,804
+C1,"one price per (chain, EAN): latest date",804,136,668
+F6,EAN in the cleaned OFF tables (nutrition available),668,139,529
+F7,package size in g or ml known in OFF,529,94,435
+F8,price per 100 g/ml within CHF 0.01-50.0,435,0,435

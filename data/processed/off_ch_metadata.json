@@ -23,5 +23,15 @@
     "rows_raw": 23824,
     "rows_clean": 15162,
     "cleaned_at": "2026-11-03T16:13:17+00:00"
+  },
+  "openprices_extension": {
+    "source_url": "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz",
+    "source_downloaded_at": "2026-11-03T15:40:54+00:00",
+    "codes_not_in_swiss_extract": 177,
+    "found_in_dump": 137,
+    "raw_parquet_sha256": "ab303ba29d5049e8a828eabd24b22bee3ce4f52fe5143e954c2b7034b75429be",
+    "rows_raw": 137,
+    "rows_clean": 105,
+    "cleaned_at": "2026-11-10T15:18:36+00:00"
   }
 }

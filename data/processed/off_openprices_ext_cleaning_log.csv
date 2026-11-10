@@ -1,0 +1,12 @@
+rule,description,rows_before,rows_removed,rows_after
+F1,Code is not a valid EAN-8/EAN-13 (wrong length or check digit),137,1,136
+F2,Duplicate code (kept the most recently modified entry),136,0,136
+F3,Alcoholic beverage,136,0,136
+F4,Baby / infant food,136,0,136
+F5,"Non-food item (pet food, cosmetics, household)",136,2,134
+F6,"Missing at least one core nutrient (energy, fat, saturated fat, sugars, proteins, salt)",134,29,105
+F7a,Nutrient outside 0-100 g per 100 g,105,0,105
+F7b,Energy outside 0-3800 kJ per 100 g,105,0,105
+F7c,Saturated fat > fat or sugars > carbohydrates (0.5 g tolerance),105,0,105
+F7d,Fat + carbohydrates + fiber + proteins + salt > 105 g,105,0,105
+F7e,kJ and kcal disagree AND kJ does not match energy computed from macros (+-20 %),105,0,105

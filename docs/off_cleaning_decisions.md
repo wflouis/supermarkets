@@ -97,6 +97,17 @@ confirmar o vetar matches (M9). El export no tiene una columna de idioma; el ale
 detecta en `matching.py`. Las procedencias (URL, fecha de descarga, SHA-256) están en
 `off_ch_metadata.json`, bajo `aldi_extension`.
 
+**E8. Extensión para Open Prices: fichas no suizas de productos con precio en Suiza**
+(`python src/openfoodfacts.py openprices-ext`, `data/raw/off_openprices_ext_raw.parquet`).
+De los EAN con un precio en una tienda suiza en Open Prices
+([`openprices_decisions.md`](openprices_decisions.md)), 177 no están en el extracto suizo.
+Del export del 2026-11-03 se toman sus fichas de cualquier país (137 encontradas) y se
+limpian con las mismas reglas F1–F7 y C1–C12: quedan 105
+(`off_openprices_ext_cleaning_log.csv`). *Justificación:* el precio prueba que el producto se
+vende en Suiza, y el EAN identifica el producto exacto. A diferencia de E6, no hay que
+suponer que una ficha de otro país describe un producto con el mismo nombre. Procedencia
+en `off_ch_metadata.json`, bajo `openprices_extension`.
+
 ## F. Filtros (eliminan filas)
 
 **F1. El código debe ser un EAN-8 o EAN-13 válido, con dígito verificador correcto.**

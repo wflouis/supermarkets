@@ -11,6 +11,8 @@ data/raw/*
 !data/raw/aldi_details_raw.parquet
 !data/raw/off_aldi_ext_raw.parquet
 !data/raw/off_ingredients.parquet
+!data/raw/off_openprices_ext_raw.parquet
+!data/raw/openprices_raw.parquet
 
 # Python
 __pycache__/

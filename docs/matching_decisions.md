@@ -5,7 +5,7 @@ Script: [`src/matching.py`](../src/matching.py) · Resultados en
 `data/processed/products_matched.parquet` (un registro por producto: precio + nutrición).
 Muestra de revisión manual: `data/processed/match_review_sample.csv`.
 
-Los identificadores (M1…M10) aparecen como comentarios en el código. Los candidatos OFF
+Los identificadores (M1…M11) aparecen como comentarios en el código. Los candidatos OFF
 son el subconjunto suizo limpio y, solo para Aldi, las fichas alemanas y austriacas de
 las marcas que vende Aldi (E6 de [`off_cleaning_decisions.md`](off_cleaning_decisions.md)).
 
@@ -155,6 +155,30 @@ es menor que el 90 % de M4 porque aquí no hay control de tamaño ni de cobertur
 tienda. Exigir ingredientes solo a las fichas DE/AT habría sido una regla sin base. Las
 fichas suizas tienen prioridad en el desempate (M5). Volgshop no usa fichas DE/AT: casi
 todo su surtido es suizo y tiene nutrición propia.
+
+**M11. Migros, Coop, Lidl y Denner desde Open Prices, unidos por EAN.** `products_matched`
+incluye los 421 productos de esas cadenas de `openprices_clean.parquet`
+([`openprices_decisions.md`](openprices_decisions.md)), con `match_method = 'ean'`,
+nutrición de OFF y `category_main` vacío (la categoría común es PNNS). Dos columnas nuevas
+en todas las filas:
+- `price_source`: `retailer_web` (catálogo scrapeado de Aldi y Volgshop) u `open_prices`.
+- `price_date`: fecha del scraping (2026-11-03) o del precio en Open Prices.
+
+Los 14 productos de Aldi en Open Prices no se agregan: el catálogo scrapeado de Aldi es
+completo y de una sola fecha. Las filas de Aldi y Volgshop no cambian.
+
+| Cadena | Fuente del precio | Productos | Con Nutri-Score |
+|---|---|---:|---:|
+| Aldi | catálogo web | 1 577 | 214 |
+| Volgshop | catálogo web | 445 | 99 |
+| Migros | Open Prices | 242 | 226 |
+| Coop | Open Prices | 131 | 122 |
+| Lidl | Open Prices | 33 | 32 |
+| Denner | Open Prices | 15 | 13 |
+| **Total** | | 2 443 | **706** |
+
+15 EAN aparecen en más de una cadena, lo que permite comparar precios del mismo producto
+entre cadenas, aunque en una muestra pequeña.
 
 ## Limitaciones
 

@@ -12,6 +12,8 @@ Usage:
     python src/openfoodfacts.py all        # download + extract + clean
     python src/openfoodfacts.py extract    # skip the download, reuse the CSV on disk
     python src/openfoodfacts.py clean      # only re-run cleaning from off_ch_raw.parquet
+    python src/openfoodfacts.py aldi-ext        # E6/E7: DE/AT entries of Aldi brands + ingredients
+    python src/openfoodfacts.py openprices-ext  # E8: non-Swiss entries of Open Prices EANs
 
 Every filtering and cleaning rule is justified in docs/off_cleaning_decisions.md.
 The rule ids (F1, C1, ...) in the comments below refer to that document.
@@ -166,6 +168,27 @@ def extract_ingredients(src: Path = CSV_PATH, dst: Path = INGREDIENTS_PATH) -> d
         ) TO '{dst.as_posix()}' (FORMAT parquet)""")
     n = con.execute(f"SELECT count(*), count(ingredients_text) FROM '{dst.as_posix()}'").fetchone()
     return {"ingredient_rows": n[0], "with_ingredients": n[1]}
+
+
+# --------------------------------------------------------------------------- open prices extension
+OP_EXT_RAW_PATH = RAW_DIR / "off_openprices_ext_raw.parquet"
+OPENPRICES_RAW_PATH = RAW_DIR / "openprices_raw.parquet"
+
+
+def extract_openprices_extension(src: Path = CSV_PATH, dst: Path = OP_EXT_RAW_PATH) -> dict:
+    """E8: products with a price reported in a Swiss shop on Open Prices whose OFF entry is
+    not tagged Switzerland. The price proves they are sold in Switzerland, and the EAN
+    identifies the exact product, so the entry is used as is. Same columns and cleaning."""
+    con = duckdb.connect()
+    cols = ", ".join(f'"{c}"' for c in RAW_COLUMNS)
+    codes = f"""SELECT DISTINCT product_code FROM '{OPENPRICES_RAW_PATH.as_posix()}'
+                WHERE osm_country_code = 'CH' AND type = 'PRODUCT' AND product_code IS NOT NULL
+                EXCEPT SELECT code FROM '{RAW_PATH.as_posix()}'"""
+    con.execute(f"""COPY (SELECT {cols} FROM {_reader(src)} WHERE code IN ({codes}))
+                    TO '{dst.as_posix()}' (FORMAT parquet)""")
+    n_codes = con.execute(f"SELECT count(*) FROM ({codes})").fetchone()[0]
+    return {"codes_not_in_swiss_extract": n_codes,
+            "found_in_dump": con.execute(f"SELECT count(*) FROM '{dst.as_posix()}'").fetchone()[0]}
 
 
 # --------------------------------------------------------------------------- clean
@@ -387,10 +410,34 @@ def write_extension_metadata(log: list[tuple]) -> None:
     META_PATH.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def write_openprices_extension_metadata(stats: dict, log: list[tuple]) -> None:
+    """E8 provenance."""
+    meta = json.loads(META_PATH.read_text(encoding="utf-8")) if META_PATH.exists() else {}
+    meta["openprices_extension"] = {
+        "source_url": DUMP_URL,
+        "source_downloaded_at": datetime.fromtimestamp(
+            CSV_PATH.stat().st_mtime, tz=timezone.utc).isoformat(timespec="seconds"),
+        **stats,
+        "raw_parquet_sha256": hashlib.sha256(OP_EXT_RAW_PATH.read_bytes()).hexdigest(),
+        "rows_raw": log[0][2], "rows_clean": log[-1][4],
+        "cleaned_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    META_PATH.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("stage", choices=["download", "extract", "clean", "all", "aldi-ext"])
+    parser.add_argument("stage", choices=["download", "extract", "clean", "all", "aldi-ext",
+                                          "openprices-ext"])
     stage = parser.parse_args().stage
+    if stage == "openprices-ext":   # E8; needs the dump and data/raw/openprices_raw.parquet
+        stats = extract_openprices_extension()
+        print(stats)
+        log = clean(OP_EXT_RAW_PATH, PROCESSED_DIR, name="off_openprices_ext")
+        write_openprices_extension_metadata(stats, log)
+        for rule, desc, before, removed, after in log:
+            print(f"{rule:<4} {desc[:60]:<60}  -{removed:>6}  -> {after}")
+        return
     if stage == "aldi-ext":   # E6/E7; needs the dump on disk and data/processed/aldi_clean.parquet
         if not ALDI_EXT_RAW_PATH.exists():
             print(extract_aldi_extension())

@@ -12,7 +12,8 @@ Usage:
     python src/matching.py
 
 Neither shop publishes EANs, so matching is by brand and name (README, pass 2). Rules
-M1-M8 are justified in docs/matching_decisions.md.
+M1-M11 are justified in docs/matching_decisions.md. products_matched also carries the
+Migros/Coop/Lidl/Denner prices from Open Prices (M11, joined on EAN by openprices.py).
 """
 from __future__ import annotations
 
@@ -33,6 +34,11 @@ OFF_PATH = PROCESSED_DIR / "off_ch_clean.parquet"
 OFF_EXT_PATH = PROCESSED_DIR / "off_aldi_ext_clean.parquet"      # E6: DE/AT, Aldi brands
 INGREDIENTS_PATH = ROOT / "data" / "raw" / "off_ingredients.parquet"
 ALDI_DETAILS_PATH = ROOT / "data" / "raw" / "aldi_details_raw.parquet"
+OPENPRICES_PATH = PROCESSED_DIR / "openprices_clean.parquet"
+RETAIL_META_PATH = PROCESSED_DIR / "retail_metadata.json"
+# M11: chains whose prices come from Open Prices. Aldi is left out: its scraped
+# catalogue is complete and dated, the 14 Open Prices entries add nothing.
+OPENPRICES_CHAINS = ("migros", "coop", "lidl", "denner")
 
 NUTRIENTS = ["energy_kj", "fat", "saturated_fat", "carbohydrates", "sugars", "fiber", "proteins", "salt"]
 OFF_COLUMNS = ["code", "product_name", "brands", "product_quantity", "product_quantity_unit",
@@ -287,6 +293,7 @@ def combine(aldi: list[dict], volg: list[dict], matches: list[dict], off: OffInd
     """M8: one row per retailer product with price, matched OFF fields and final nutrition."""
     off_by_code = {o["code"]: o for o in off.rows}
     m_by_id = {(m["retailer"], m["retailer_id"]): m for m in matches}
+    scraped = _scrape_dates()
     out = []
     for shop, rows in (("aldi", aldi), ("volg", volg)):
         for r in rows:
@@ -314,7 +321,40 @@ def combine(aldi: list[dict], volg: list[dict], matches: list[dict], off: OffInd
             else:
                 src, row["nutrition_source"] = {}, None
             row.update({k: src.get(k) for k in NUTRIENTS})
+            row.update(price_source="retailer_web", price_date=scraped[shop])
             out.append(row)
+    return out + openprices_rows()
+
+
+def _scrape_dates() -> dict[str, str | None]:
+    import json
+    meta = json.loads(RETAIL_META_PATH.read_text(encoding="utf-8")) if RETAIL_META_PATH.exists() else {}
+    return {shop: (meta.get(shop, {}).get("scraped_at") or "")[:10] or None for shop in ("aldi", "volg")}
+
+
+def openprices_rows() -> list[dict]:
+    """M11: Open Prices products, already joined to OFF on EAN by openprices.py."""
+    if not OPENPRICES_PATH.exists():
+        return []
+    chains = ", ".join(f"'{c}'" for c in OPENPRICES_CHAINS)
+    out = []
+    rel = duckdb.sql(f"SELECT * FROM '{OPENPRICES_PATH.as_posix()}' WHERE chain IN ({chains})")
+    for o in (dict(zip(rel.columns, r)) for r in rel.fetchall()):
+        row = {"retailer": o["chain"], "retailer_id": o["code"], "name": o["product_name"],
+               "brand": o["brand_main"], "category_main": None, "category_sub": None,
+               "size_value": o["size_value"], "size_unit": o["size_unit"],
+               "price_chf": o["price_chf"], "price_per_100_chf": o["price_per_100_chf"],
+               "price_per_100_unit": o["size_unit"], "is_organic": o["is_organic"],
+               "origin_status_retailer": None, "matched": True, "match_score": None,
+               "match_method": "ean", "off_scope": o["off_scope"], "off_code": o["code"],
+               "off_name": o["product_name"]}
+        for c in ["main_category", "pnns_group_1", "pnns_group_2", "nutriscore_grade",
+                  "nutriscore_score", "nova_group", "origin_status"]:
+            row[f"off_{c}"] = o[c]
+        row["nutrition_source"] = "off"
+        row.update({k: o[k] for k in NUTRIENTS})
+        row.update(price_source="open_prices", price_date=str(o["price_date"]))
+        out.append(row)
     return out
 
 
@@ -410,6 +450,7 @@ def main() -> None:
         ms = [m for m in matches if m["retailer"] == shop]
         acc = collections.Counter(m["method"] for m in ms if m["accepted"])
         print(f"{shop}: {len(ms)} products, {sum(acc.values())} matched  {dict(acc)}")
+    print("open prices (EAN):", dict(collections.Counter(r["retailer"] for r in openprices_rows())))
 
 
 if __name__ == "__main__":
