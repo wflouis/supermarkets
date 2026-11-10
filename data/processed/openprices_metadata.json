@@ -1,0 +1,13 @@
+{
+  "source_url": "https://prices.openfoodfacts.org/api/v1/prices?currency=CHF",
+  "licence": "Open Database License (ODbL) — https://prices.openfoodfacts.org",
+  "downloaded_at": "2026-11-10 16:16:58+01",
+  "price_dates": [
+    "2023-09-01",
+    "2026-11-07"
+  ],
+  "raw_parquet_sha256": "cff2f498e551f21b5897e9c28c9a657cfdb2825c75d0129abdc9528f48ac209b",
+  "rows_raw": 1050,
+  "rows_clean": 435,
+  "cleaned_at": "2026-11-10T15:26:29+00:00"
+}

@@ -5,6 +5,14 @@
 # Raw scraper and API output
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/off_ch_raw.parquet
+!data/raw/aldi_raw.parquet
+!data/raw/volg_raw.parquet
+!data/raw/aldi_details_raw.parquet
+!data/raw/off_aldi_ext_raw.parquet
+!data/raw/off_ingredients.parquet
+!data/raw/off_openprices_ext_raw.parquet
+!data/raw/openprices_raw.parquet
 
 # Python
 __pycache__/

@@ -1,0 +1,372 @@
+brand,ch_code,ch_name,de_at_code,de_at_name,ingredient_score,agree
+heinz,8715700016504,Tomato Ketchup,0013000006057,Tomato Ketchup,,false
+heinz,87157277,Tomato Ketchup,0013000006057,Tomato Ketchup,,false
+heinz,8715700225630,tomato ketchup,0057000613280,Heinz Tomato Ketchup,,false
+heinz,8715700125817,Bio Ketchup,0863495676040,ketchup,,true
+heinz,8715700131139,Heinz Beanz in a rich tomato sauce,5000157076083,Heinz Beanz in a rich tomato sauce,100.0,false
+heinz,87157260,Tomato Ketchup,50157617,Tomato Ketchup,,true
+heinz,8715700016504,Tomato Ketchup,8715700012506,Tomato Ketchup,,true
+heinz,87157277,Tomato Ketchup,8715700012506,Tomato Ketchup,,true
+heinz,8715700131139,Heinz Beanz in a rich tomato sauce,8715700111094,HEINZ BEANZ In a rich tomato sauce,83.3,false
+heinz,8715700225630,tomato ketchup,8715700115504,Tomato Ketchup,,true
+heinz,8715700110103,Ketchup Bio,8715700126067,ketchup,,false
+heinz,87157246,Ketchup,8715700126067,ketchup,,true
+heinz,50457137,Tomato Ketchup,8715700421612,Tomato Ketchup,,true
+ovomaltine,7612100911280,Ovomaltine Crunchy Müesli,7612100028407,Ovomaltine crunchy müsli,,false
+wander,7612100804070,Crunchy cream,7612100923085,Crunchy Cream,,true
+kellogg s,5053827116275,Crunchy Müsli : Choco&Nuts,03583111,Kellogg's Crunchy Müsli Choco &Nuts,70.6,true
+kellogg s,0038100212290,Corn Flakes,5050083544491,Corn Flakes,,true
+kellogg s,5738001092490,Corn Flakes,5053827187343,corn flakes,,false
+kellogg s,5053827171601,Toppas,5053827202381,Toppas classic,,false
+kellogg s,4003994115503,Crunchy Nut,5059319016818,Crunchy nut,,false
+kellogg s,5053827101424,Smacks,5059319023670,Kellogg's Smacks,,true
+kellogg s,5053827197861,Kellogg's Tresor Choco Roulette,5059319031286,Trésor choco roulette,,true
+kellogg s,5053827205634,Tresor Choco Roulette,5059319031286,Trésor choco roulette,,true
+m m s,5000159380980,M&Ms,5000159511230,m&ms,,true
+m m s,5000159423175,M&ms,5000159511230,m&ms,,true
+m m s,5000159446488,M&M's Peanut,5000159571586,peanut m&m's,,true
+m m s,5000159452595,PEANUT M&M's,5000159571586,peanut m&m's,90.6,true
+old el paso,8410076474001,Gluten Free 6 Tortillas,8410076473998,Gluten Free Tortillas,,true
+nestle,7613031443000,Nescafé,4005500005827,Nescafé Classic,,false
+san pellegrino,8002270856501,Limonata,8002270396502,Limonata,71.4,true
+ferrero,3017620424403,Nutella,05574315,Nutella,,true
+ferrero,3017620425400,Nutella,12222575,Nutella,,true
+ferrero,3017620428401,Nutella,12222575,Nutella,,true
+ferrero,4008400401928,Nutella,12222575,Nutella,,true
+ferrero,80051428,Nutella,12222575,Nutella,,true
+ferrero,80176800,Nutella 750g,12222575,Nutella,,true
+ferrero,3017620424403,Nutella,3017620422003,Nutella,,true
+ferrero,80762003,Nutella,3017620422003,Nutella,,true
+ferrero,3017620425400,Nutella,4006400404123,Nutella,,true
+ferrero,4008400401928,Nutella,4006400404123,Nutella,,true
+ferrero,80051428,Nutella,4006400404123,Nutella,,true
+ferrero,80176800,Nutella 750g,4006400404123,Nutella,,true
+ferrero,4008400204727,Kinder Schokolade,4008400204222,Kinder Schokolade,,true
+ferrero,3017620420047,Nutella,4008400401225,nutella,,true
+ferrero,3017620428401,Nutella,4008400401225,nutella,,true
+ferrero,4008400401928,Nutella,4008400401225,nutella,,true
+ferrero,8000500278802,Nutella,4008400401225,nutella,,true
+ferrero,80051428,Nutella,4008400401225,nutella,,true
+ferrero,3017620402135,Nutella,4008400401829,Nutella,,true
+ferrero,3017620420047,Nutella,4008400401829,Nutella,,true
+ferrero,8000500166819,Nutella 1кг,4008400401829,Nutella,,true
+ferrero,8000500278802,Nutella,4008400401829,Nutella,,true
+ferrero,3017620425400,Nutella,4008400409627,nutella,,true
+ferrero,3017620428401,Nutella,4008400409627,nutella,,true
+ferrero,4008400401928,Nutella,4008400409627,nutella,,true
+ferrero,80051428,Nutella,4008400409627,nutella,,true
+ferrero,80176800,Nutella 750g,4008400409627,nutella,,true
+ferrero,3017620425400,Nutella,4008400409733,Nutella,,true
+ferrero,3017620428401,Nutella,4008400409733,Nutella,,true
+ferrero,4008400401928,Nutella,4008400409733,Nutella,,true
+ferrero,80051428,Nutella,4008400409733,Nutella,,true
+ferrero,80176800,Nutella 750g,4008400409733,Nutella,,true
+kinder,4008400221021,Kinder Maxi,4008400828121,Kinder Maxi,,true
+ferrero,3017620424403,Nutella,41217627,Nutella,,true
+ferrero,8000500032237,Ferrero Rocher,8000500273296,Ferrero Rocher,,true
+ferrero,4008400181523,Raffaello,8000500288696,Raffaello,,true
+ferrero,3017620402135,Nutella,8000500357729,Nutella,,true
+ferrero,3017620420047,Nutella,8000500357729,Nutella,,true
+ferrero,3017620428401,Nutella,8000500357729,Nutella,,true
+ferrero,8000500166819,Nutella 1кг,8000500357729,Nutella,,true
+ferrero,8000500278802,Nutella,8000500357729,Nutella,,true
+ferrero,80051428,Nutella,8000500357729,Nutella,,true
+ferrero,3017620402135,Nutella,8000500415573,Nutella,,true
+ferrero,3017620420047,Nutella,8000500415573,Nutella,,true
+ferrero,8000500166819,Nutella 1кг,8000500415573,Nutella,,true
+ferrero,8000500278802,Nutella,8000500415573,Nutella,,true
+ferrero,3017620424403,Nutella,9000501052042,Nutella,,true
+milsani,4061463946980,Magerquark,4061458012171,Magerquark,,true
+milsani,7061318012171,Magerquark,4061458012171,Magerquark,,true
+milsani,4061459453553,Käse Aufschnitt,4061458046749,Käse-Aufschnitt,,true
+milsani,4061458224437,Skyr frucht und hafer,4061458224420,Skyr Frucht und Hafer,,true
+milsani,4061462615481,skyr,4061458229838,skyr,,true
+milsani,4088500730166,Edamer,4061461119201,edamer,,true
+milsani,4061458024204,Fettarme Milch,4061462842764,Fettarme Milch,,true
+milsani,4061462615481,skyr,4065019020445,SKYR,,true
+aldi,4099200168890,Pesto alla Genovese,4047247012959,Pesto alla genovese,,true
+aldi,4061461775698,Pesto Rosso,4047247012966,Pesto Rosso,,false
+aldi,4069365162163,Pesto Rosso,4047247012966,Pesto Rosso,,false
+aldi,4061461775698,Pesto Rosso,4047247860789,Pesto rosso,,true
+aldi,4069365162163,Pesto Rosso,4047247860789,Pesto rosso,,false
+aldi,4099200030128,Pancakes,4061458000390,Pancakes,,true
+aldi,4061461399368,Tortelli Ziegenfrischkäse mit Honig,4061458014885,Tortelli Ziegenfrischkäse mit Honig,91.7,true
+aldi,4099200422763,Schupfnudeln,4061458018777,Schupfnudeln,52.2,false
+aldi,4099200422763,Schupfnudeln,4061458048903,SCHUPFNUDELN,63.6,false
+aldi,4099200038810,Jus d'oranges bio,4061458067669,Jus d’orange,,true
+cucina nobile,4061461775698,Pesto Rosso,4061458073301,Pesto Rosso,42.6,false
+aldi,4069365162163,Pesto Rosso,4061458073301,Pesto Rosso,,false
+aldi,4099200168890,Pesto alla Genovese,4061458073318,Pesto - alla Genovese,,false
+aldi,4099200168890,Pesto alla Genovese,4061458116473,Pesto Alla Genovese,,true
+aldi,4061461775698,Pesto Rosso,4061458116497,Pesto rosso,57.8,false
+aldi,4069365162163,Pesto Rosso,4061458116497,Pesto rosso,,false
+aldi,4061459759020,Pesto alla Calabrese,4061458116503,Pesto Alla Calabrese,,false
+aldi,4061459600070,Pasta-Sauce - Tomate-Ricotta,4061458150781,Pasta Sauce Tomate Ricotta,,true
+aldi,4061462866319,Erdbeere,4061458268851,Bio-Erdbeeren,,false
+aldi,4061462573064,Huhn süss-sauer,4061459339680,Huhn süß-sauer,,true
+aldi,4099200149394,Beerenmischung,4061459581942,Beerenmischung,,true
+king s crown,4061461616397,Mixed Pickles,4061459745115,Mixed Pickles,72.7,true
+aldi,4099200168890,Pesto alla Genovese,4061459758603,Pesto alla Genovese,,false
+cucina nobile,4061461775698,Pesto Rosso,4061459758818,Pesto Rosso,56.1,false
+aldi,4069365162163,Pesto Rosso,4061459758818,Pesto Rosso,,false
+cucina nobile,4061459759020,Pesto alla Calabrese,4061459758832,Pesto Alla Calabrese,,true
+aldi,4061458102704,Bio-Fusilli aus Kichererbsen,4061461247140,Bio-Fusilli aus Kichererbsen,,true
+aldi,24129312,Pesto alla genovese,4061461781811,Bio-Pesto alla Genovese,,false
+aldi,4061463825209,Pesto alla Genovese,4061461781811,Bio-Pesto alla Genovese,,false
+aldi,4099200867373,Pesto alla genovese,4061461781811,Bio-Pesto alla Genovese,,false
+aldi,22114839,Original Nürnberger Rostbratwürste,4061462022753,Bio-Nürnberger Rostbratwürste,,true
+grandessa,4099200419220,Confiture framboise,4061462119644,Confiture Framboise,,true
+aldi,28126607,Geflügel Wienerli,4061462733345,Geflügel Wiener,,true
+aldi,4061463563941,Pizza Pocket Burger,4061463566676,Pizza Pockets - Burger,,true
+gourmet finest cuisine,4061458126229,Pesto - Spinat-Fetakäse,4061464173958,Pesto - Spinat & Fetakäse,59.5,false
+aldi,4099200413396,Pizza Margherita,4068706860003,Pizza Margherita,,false
+happy harvest,4099200022550,Nussvariation,24693943,Nussvariation,,true
+good choice,4099200422763,Schupfnudeln,4061459473667,Schupfnudeln,,false
+good choice,4099200422756,Eierspätzli,4099200231792,Eierspätzle,87.5,false
+just veg,4061462636509,Vegane Nuggets,4099200216164,Vegane Nuggets,,false
+alpro,5411188120742,Mandel Vanille Geschmack,41417812,Vanille Mandel Geschmack,,false
+alpro,5411188136910,"Alpro Sojadrink, Vanille -Geschmack 250ml",5411188121770,"Alpro Sojadrink, Vanille-Geschmack 250ml",,true
+haribo,4001686011249,Color-Rado,4001686001301,Color-Rado,66.1,true
+haribo,4001686723999,Color-rado,4001686001301,Color-Rado,,true
+haribo,9002975390699,Haribo Phantasia,4001686001332,Phantasia,,true
+haribo,9002975390699,Haribo Phantasia,4001686011256,Phantasia,,true
+haribo,4001686368930,Tropifrutti,4001686011263,Tropifrutti,,true
+haribo,9002975367486,TROPIFRUTTI,4001686011263,Tropifrutti,,true
+haribo,23167308,Happy hareween,4001686306710,Happy Hariween,86.4,true
+haribo,4001686392515,Fruitmania Berry,4001686327814,Fruitmania Berry,,true
+haribo,4001686340264,Haribo - Bärchen-Pärchen,4001686331668,Bärchen Pärchen,,true
+haribo,4001686367346,Haribo Tropifrutti 200G,4001686335864,tropifrutti,,true
+haribo,4001686367346,Haribo Tropifrutti 200G,4001686368145,Tropifrutti,,true
+haribo,4001686304211,Goldbären 75 gr,4001686387207,Goldbären,,true
+haribo,4001686011249,Color-Rado,4001686720660,Haribo Color-Rado,,true
+haribo,4001686723999,Color-rado,4001686720660,Haribo Color-Rado,,true
+haribo,5410358451020,chamallows,5410358473114,Chamallows,,true
+haribo,9002975471893,Haribo Quaxi,9002975003148,Haribo Quaxi,,true
+haribo,4001686368930,Tropifrutti,9002975367677,Tropifrutti,,true
+zuger frischkase,7640166792512,Mozzarella,7640101099485,Mozarella,,true
+dr oetker,4000521122706,Bourbon-Vanillezucker,4000521024802,Bourbon Vanillezucker,,true
+dr oetker,7610089366923,Muffins,4000521030117,Muffins classic,,true
+dr oetker,7610089367418,Chunks au chocolat,4000521030896,Chocolate Chunks,,false
+dr oetker,7610089006775,Milchreis,4000521770006,Milchreis,,false
+dr oetker,7610089006775,Milchreis,4000521770808,Milchreis,60.0,false
+dr oetker,4001724819806,Ristorante Pizza Mozzarella,4001724022398,Ristorante Pizza Mozzarella,,false
+knorr,8714100396575,Asia Noodles Chicken Taste,8710522627433,Asia Noodles - Chicken Taste,31.9,true
+knorr,8710908971969,Asian Noodles Green Curry,8710908979415,Asia green curry noodles,,true
+knorr,8711200369850,Kürbiscrèmesuppe,8711200369355,Kürbiscremesuppe,60.6,true
+knorr,7611100338929,Bouillon de poule,8711200438921,Bouillon de poule,,true
+knorr,8711200369850,Kürbiscrèmesuppe,8712423038097,Kürbiscremesuppe,19.0,true
+knorr,7611100149600,Buchstaben Suppe,8712566332090,Buchstaben Suppe,,false
+knorr,8710908972034,Asia noodles Chicken Taste,8714100680339,Asia Noodles Chicken Taste,,false
+knorr,8711200326457,Soupe de brocoli,8714100900468,Soupe Brocolis,,true
+knorr,8714100396575,Asia Noodles Chicken Taste,8720182862549,Asia Noodles-Chicken Taste,,true
+knorr,8711200340200,Gemüsesuppe,8720182958501,Gemüsesuppe,,false
+emmi,2157156006856,Luzerner Rahmkäse,2168445006709,Luzerner Rahmkäse Bio,,true
+emmi,7610900013524,Jogurt Pur,7610900013999,Jogurt pur,,true
+emmi,2218506006992,tête de Moine,7610900124992,tete de moine,,true
+emmi,7610900292813,Caffè Latte,7610900205028,Caffè latte,,true
+emmi,7610900884940,Matcha Latte,7610900884957,MATCHA LATTE,,true
+snack fun,24015820,Twisted Sticks,4099200018713,Twisted Sticks,,true
+snack fun,4099200198934,Hummus Chips,4099200208022,Hummus Chips,,true
+monarc,4099200066943,Schoko Lebkuchen,4061461649883,Schoko Lebkuchen,,true
+thomy,7610100055607,Hollandaise,40056265,Hollandaise,,false
+thomy,7610100055607,Hollandaise,40057859,Hollandaise,,false
+thomy,7610100018015,Sauce Curry,42353874,Curry sauce,,true
+thomy,7610100055607,Hollandaise,42395010,Hollandaise,,false
+thomy,7613287261236,Mayonnaise,42403098,Mayonaise,27.6,true
+thomy,40056012,Delikatess Mayonnaise,42448174,Delikatess Mayonnaise,,true
+thomy,7610100034145,Mayonnaise,8445290718044,Mayonnaise,,false
+thomy,7613287084606,Mayonnaise,8445290718044,Mayonnaise,,false
+thomy,7613287937353,BBQ Sauce,8445291252950,BBQ Sauce,56.2,false
+thomy,7613036762779,Tartare sauce,8445291409750,Sauce Tartare,,true
+maggi,7613287295323,Saucy Noodles Sweet Chili,7613037683608,Saucy Noodles Sweet Chili,,true
+maggi,3033710036899,Bouillon Poule,8585002483072,Bouillon de poulet,,false
+schar,8008698002599,PAIN CAMPAGNARD - Grandes tranches,8008698022214,PAIN CAMPAGNARD AUX GRAINES - Grandes tranches aux graines,,false
+coca cola,5000112609516,Coca-Cola Zero,10001776,Coca-Cola Zero,,true
+coca cola,5449000137609,Coca-Cola Zero,10001776,Coca-Cola Zero,,true
+coca cola,5000112609516,Coca-Cola Zero,5000112552195,Coca-Cola Zero,,true
+coca cola,5449000137609,Coca-Cola Zero,5000112552195,Coca-Cola Zero,,true
+coca cola,5000112554359,Coca-Cola zéro,5000112604450,Cola Zero,,true
+coca cola,5449000195906,Coca-Cola Zero Zero,5000112617689,Coca Cola Zero,,true
+coca cola,5449000054227,Coca-Cola Original Taste,5000112673364,Original Taste,,true
+hero,7614200011938,Original Rösti,7614200004916,Rösti 3X500G,,true
+hero,7614200112536,Original Rösti,7614200004916,Rösti 3X500G,,true
+movenpick,4011800103927,Haselnuss Creme,4011800102920,Haselnuss Crème,87.8,true
+hellmann s,8712100839023,Tomato Ketchup,8711200424382,Tomato Ketchup,,true
+hellmann s,8712100839023,Tomato Ketchup,8711200474509,Tomato Ketchup,,false
+bellasan,4088500704853,Margarine,22112446,Magarine,,true
+bellasan,4088500704853,Margarine,4061458029711,Margarine,,true
+bellasan,4099200414447,Rapsöl,4061459399448,Rapsöl,,true
+le gusto,4099200071688,Basilikum,4061458184977,Basilikum,,false
+knusperone,4061458039222,Schoko Chips,22141767,Schoko Chips,,true
+grandessa,4061459424768,Nutoka,4061462089510,Nutoka,,true
+sweet valley,4099200023335,Cranberries,23155053,Cranberries,,true
+sweet valley,4061459543537,Heidelbeeren,4047247009904,Heidelbeeren,,false
+sweet valley,4099200013954,Heidelbeeren,4047247009904,Heidelbeeren,,false
+sweet valley,4099200011837,Ananas,4061458004008,Annanas,,false
+sweet valley,22114426,Apfelmus,4061458004015,Sweet Valley Apfelmus,,true
+sweet valley,4099200401447,Apfelmus,4061458004015,Sweet Valley Apfelmus,,true
+sweet valley,4099200023311,Soft-Aprikosen,4061458058940,Soft-aprikosen,,true
+sweet valley,4099200023359,Soft-Feigen,4061458058957,Soft-Feigen,,false
+sweet valley,4099200023335,Cranberries,4061458071246,Cranberries,,true
+sweet valley,22114426,Apfelmus,4061461374655,Apfelmus,,false
+sweet valley,4099200401447,Apfelmus,4061461374655,Apfelmus,,false
+sweet valley,22114426,Apfelmus,4061462163029,Apfelmus,,true
+sweet valley,4099200401447,Apfelmus,4061462163029,Apfelmus,,true
+sweet valley,22114426,Apfelmus,4061462928307,Apfelmus,,true
+sweet valley,4099200401447,Apfelmus,4061462928307,Apfelmus,,false
+sweet valley,22114426,Apfelmus,4061462928321,Apfelmus,,false
+sweet valley,4099200401447,Apfelmus,4061462928321,Apfelmus,,false
+sweet valley,22114426,Apfelmus,4061464524637,Apfelmus,,false
+sweet valley,4099200401447,Apfelmus,4061464524637,Apfelmus,,false
+storck,22114990,"Merci Finest Selektion,",22148278,merci Finest Selection,,true
+storck,4035800469999,Knoppers Minis,29037186,Knoppers minis,,true
+storck,4014400927573,Werther's Original Caramelts,29037209,Werther's Original Caramelts,,false
+merci,4014400921243,Merci Finest Selection,4014400901191,Merci Finest Selection,,true
+storck,4014400919080,Lachgummi Milchbubis,4014400927481,Lachgummi Milchbubis,,true
+storck,4035800469999,Knoppers Minis,4014400929010,Knoppers minis,,true
+storck,22114990,"Merci Finest Selektion,",4014400932904,merci Finest Selection,,true
+nimm2,4014400901818,Lachgummi,4014400933215,Lachgummi,,true
+milfina,4099200403694,Crème fraîche,22136787,Crème fraîche,,false
+milfina,4099200418988,Crème fraîche,22136787,Crème fraîche,,false
+milfina,4061464665996,Ayran,22171221,Ayran,,true
+milfina,4061464665996,Ayran,4061458050500,Ayran,,true
+milfina,4061461859077,Käse-Snack,4061461859053,Käse-Snack,,true
+milfina,28007470,"Milch 3,5%",4099200022826,H- Milch,,true
+milfina,4099200428819,Milch,4099200022826,H- Milch,,false
+milfina,28007470,"Milch 3,5%",4099200029153,Milch,,true
+milfina,4099200428819,Milch,4099200029153,Milch,,false
+back family,22117359,Back Family Haselnusskerne (gemahlen),4061458032490,Haselnusskerne gemahlen,,false
+back family,22138262,Gemahlene Mandeln,4061458033497,Mandeln Gemahlen,,false
+back family,22117359,Back Family Haselnusskerne (gemahlen),4061458215329,Haselnusskerne gemahlen,,false
+primana,22118035,Linsen Eintopf,4061461997977,Linsen Eintopf,,true
+cucina,4069365162163,Pesto Rosso,4016459240085,Pesto Rosso,,false
+cucina,4099200019062,Mozzarella Classic,4061458018531,Mozzarella,,false
+cucina,4069365162163,Pesto Rosso,4061458028288,Pesto Rosso,,false
+cucina,4099200418605,Kapern,4061458071031,Kapern,,true
+cucina,4069365162163,Pesto Rosso,4061459042856,Pesto Rosso,,false
+cucina,4069365162163,Pesto Rosso,4061459240085,Pesto Rosso,,false
+cucina,4099200015842,GRISSOTTI,4061461010911,Grissotti,,false
+cucina,2800433002521,Grana Padano,4061462976469,Grana Padano,,true
+cucina,4069365162163,Pesto Rosso,4068706708138,Pesto Rosso,,false
+cucina,4099200019062,Mozzarella Classic,4099200018836,Mozzarella Classic,,true
+choceur,4061463103635,Mozartkugeln Zartbitter,4061458008488,Mozartkugeln Zartbitter,,true
+choceur,4099200110561,Nuss & Crisp,4061458021906,Nuss & Crisp,80.8,true
+choceur,4061462759741,Cookies & Cream,4061458173100,Cookies & Cream,64.3,true
+choceur,4099200110578,Milk jumbo,4068261023226,Milko jumbo,,true
+choceur,4099200110615,Milk jumbo,4068261023226,Milko jumbo,,true
+choceur,4099200110639,Milk Jumbo,4068261023226,Milko jumbo,,true
+choceur,24000499,Alpenvollmilch Schokolade,4099200057354,Alpenvollmilch Schokolade,,true
+aldi bio,4099200408705,Emmentaler,4061461618650,Bio-Emmentaler,,true
+almare seafood,4099200041360,Skandinavischer Räucherlachs,22114112,Skandinavischer Räucherlachs,,true
+almare seafood,4061463963680,Eismeer Garnelen,7061318024211,Eismeer Garnelen,,true
+lyttos,24534307,Halloumi,4061458112536,Halloumi,,true
+lyttos,4061463063663,Griechisches natives Olivenöl extra,4061459156461,Griechisches natives Olivenöl extra,,true
+lyttos,24534307,Halloumi,4061459313475,Halloumi,,true
+lyttos,4061463063663,Griechisches natives Olivenöl extra,4061462626883,Griechisches Natives Olivenöl Extra,,true
+lyttos,4061461001384,Griechisches natives Olivenöl extra,4069365106273,Griechisches natives Olivenöl extra,,true
+lyttos,24534307,Halloumi,4099200097510,Halloumi,,true
+lyttos,24534307,Halloumi,7061319313475,Halloumi,,true
+cucina nobile,4099200015828,Grissotti Sesam,4061458094320,Grissotti sesamo,,true
+cucina nobile,4061459498158,Tomatenmark,4061459610147,Tomatenmark,,false
+cucina nobile,4061461775711,Pesto alla Calabrese,4061459758832,Pesto Alla Calabrese,,false
+cucina nobile,4061461691547,Lasagne Bolognese,4061461533892,Lasagne Bolognese,,false
+cucina nobile,4061461691547,Lasagne Bolognese,4099200053707,Lasagne Bolognese,38.5,false
+cucina nobile,4061461849580,Lasagne Mediterran,4099200053714,Lasagne Mediterran,,false
+cucina nobile,4099200053936,Steinofenpizza,4099200053905,Steinnofenpizza,,false
+cucina nobile,4099200053943,Steinofenpizza,4099200053905,Steinnofenpizza,,false
+almare,4099200011516,Heringsfilets in Tomatencreme,0091459029162,Heringsfilets in Tomatencreme,,true
+almare,4061459205848,Heringsfilets,4061458029131,Heringsfilets,,false
+almare,4061459205848,Heringsfilets,4061458029148,Heringsfilets,,false
+almare,4099200124506,Lachsfilet in Tomaten-Mozzarella-Sauce,4061458039673,Lachsfilet in Tomaten-Mozarella-Sauce,,true
+almare,4099200011103,Thunfisch Filets in Sonnenblumenöl,4061459135121,Thunfisch Filets in Sonnenblumenöl,,false
+almare,4099200011516,Heringsfilets in Tomatencreme,4061462707476,Heringsfilets in Bio-Tomatencreme,,true
+moser roth,4099200169576,Pralines,4061458047647,Pralinen,,true
+moser roth,4099200169576,Pralines,4061458047678,Pralinen,,true
+gourmet finest cuisine,4061458126243,Pesto - Tomaten & Knoblauch,7061318126243,Tomaten & Knoblauch Pesto,,true
+golden seafood,4061461858971,Schlemmerfilet Bordelaise,4061458017374,Schlemmerfilet á la Bordelaise Classic,55.0,true
+golden seafood,4061461934354,Alaska Seelachs,4061458049528,Alaska Seelachs,,true
+red bull,90162800,Red bull sugar free,08419866,Red Bull sugar-free,,true
+red bull,9002490100193,Energy Drink,9002490100773,Energy Drink,,false
+red bull,9002490230111,Energy drink,9002490100773,Energy Drink,,true
+red bull,90162602,Red Bull Energy Drink,9002490100773,Energy Drink,,true
+red bull,90448478,Red Bull Energy Drink,9002490100773,Energy Drink,,true
+red bull,9002490100193,Energy Drink,90162565,Red Bull Energy Drink,,false
+red bull,9002490230111,Energy drink,90162565,Red Bull Energy Drink,,true
+red bull,90162602,Red Bull Energy Drink,90162565,Red Bull Energy Drink,,true
+red bull,90448478,Red Bull Energy Drink,90162565,Red Bull Energy Drink,,true
+red bull,9002490239336,Bitter Lemon,90435669,Bitter lemon,,true
+red bull,90446207,ORGANICS Viva Mate,90446290,Organics Viva Mat,57.1,true
+red bull,90474804,Red Bull Iced Gummy Bear,90457272,Iced Gummy Bear,,true
+red bull,9002490100193,Energy Drink,90457494,Energy Drink,,false
+red bull,9002490230111,Energy drink,90457494,Energy Drink,,true
+red bull,90162602,Red Bull Energy Drink,90457494,Energy Drink,,true
+red bull,90448478,Red Bull Energy Drink,90457494,Energy Drink,,true
+red bull,9002490100193,Energy Drink,90493027,ENERGY DRINK,,false
+red bull,9002490230111,Energy drink,90493027,ENERGY DRINK,,false
+red bull,90162602,Red Bull Energy Drink,90493027,ENERGY DRINK,,false
+red bull,90448478,Red Bull Energy Drink,90493027,ENERGY DRINK,,false
+red bull,9002490100193,Energy Drink,90493034,Energy Drink,,false
+red bull,9002490230111,Energy drink,90493034,Energy Drink,,true
+red bull,90162602,Red Bull Energy Drink,90493034,Energy Drink,,true
+red bull,90448478,Red Bull Energy Drink,90493034,Energy Drink,,true
+red bull,90493706,Summer Edition,90493119,THE SUMMER EDITION,,true
+kinder,4008400935225,Kinder Bueno,3017620690969,Kinder Bueno,,true
+kinder,8000500037560,bueno,3017620690969,Kinder Bueno,,true
+kinder,40084701,Kinder Schokolade,4008400207322,Kinder Schokolade,,true
+kinder,8000500309469,CHOCO fresh,4008400371429,Kinder Choco fresh,,true
+kinder,5413548280677,Kinder schoko bons,4008400621722,Schoko-Bons,,true
+kinder,5413548021010,Schoko-Bons,4008400621920,Schoko-Bons,,true
+kinder,5413548015552,Schoko-Bons,4008400622224,Kinder Schoko Bons,,true
+kinder,4008400260921,Kinder Country,8000500241707,Kinder Country,,true
+kinder,8000500309469,CHOCO fresh,8000500311509,Choco Fresh,,true
+mars,5000159473354,Bounty,5000159326599,Bounty,,true
+mars,5000159475358,Celebrations,5000159500258,Celebrations,,true
+ben s original,5010034518001,Express-Reis - Mediterran,3487400005151,Express-Reis - Mediterran,94.1,true
+rama,7615200506264,Cremefine zum Kochen 15% Fett,4000400122773,"Cremefine zum Kochen, 15% Fett",,true
+rama,8718114715162,"Cremefine, Zum Kochen 7%",8712100728044,Cremefine zum Kochen,,false
+rama,8719200040595,Rama Cremefine zum Kochen,8712100728044,Cremefine zum Kochen,83.7,true
+rama,8719200041219,Cremefine zum Kochen 7%,8712100728044,Cremefine zum Kochen,,false
+rama,8719200053939,Rama mit Butter,8712423005600,Rama mit Butter,100.0,true
+rama,8719200071575,Rama mit Butter,8712423005600,Rama mit Butter,,false
+rama,8719200292154,Butter,8712423005600,Rama mit Butter,68.8,true
+rama,8719200290952,Rama mit Butter,8719200001046,Rama mit Butter,,true
+rama,8719200035751,Cremefine,8719200040571,Cremefine,95.2,true
+rama,8719200052390,Cremefine,8719200040571,Cremefine,,true
+rama,8719200208179,Margarine,8719200208506,Margarine,,true
+rama,8719200233508,Rama Sooo Buttrig!,8719200250833,sooo buttrig,100.0,true
+ruf,4002809018565,Cranberry Kokos Porridge,4002809018282,Porridge Cranberry Kokos,,false
+zimmermann,4006153116007,Münchner Weißwürste,4061464579125,Münchner Weißwurst,66.7,true
+lambertz,4006894231601,Schokoladen Lebkuchen,4006894289800,Schokoladen Lebkuchen,,true
+lambertz,4006894231601,Schokoladen Lebkuchen,4006894289909,Schokoladen Lebkuchen,,false
+werther s original,4014400927573,Werther's Original Caramelts,4014400915013,Caramelts,,false
+nimm 2,4014400931440,Lachgummi Funfari,4014400932263,Lachgummi Funfari,96.7,true
+meine kuchenwelt,4017040416094,Cookies Milk Chocolate,4061462341038,Cookies Milk Chocolate,67.9,true
+meine kuchenwelt,4017040418098,Cookies White Chocolate,4061462341052,Cookies - White Chocolate,,true
+roi de trefle,4099200019581,Französischer Weichkäse,22125309,Original Französischer Weichkäse,,false
+roi de trefle,4099200019581,Französischer Weichkäse,4061458043229,Französischer Weichkäse,61.5,false
+roi de trefle,4099200019581,Französischer Weichkäse,4061458043267,Original französischer weichkäse,30.8,true
+crane,4099200020488,WHEY Protein,4099200020495,Whey Protein,,true
+crane,4099200035765,Protein riegel,4099200183206,Protein Riegel,,false
+crane,4099200236483,Protein Riegel,4099200183206,Protein Riegel,,false
+crane,4099200035765,Protein riegel,4099200183213,Protein riegel,,false
+crane,4099200236483,Protein Riegel,4099200183213,Protein riegel,,false
+king s crown,4061461277956,Kichererbsen,4061458149693,Kichererbsen,,true
+asia green garden,4061462573040,Chop suey,4047247719063,Chop Suey,,true
+golden bridge,4061461729547,Schoko Müsli,4061464833821,Schoko-Müsli,54.5,true
+golden bridge,4061462244117,Müsli Vollkorn,4061464835580,Müsli Vollkorn,,true
+bermont,4099200021638,Kräuterli,29038794,Kräuterli,,true
+bermont,4099200021638,Kräuterli,4061461435721,Kräuterli Original,,true
+rummo,8008343279789,Ragu alla bolognese,8008343299664,Ragù alla Bolognese,,false
+barilla,8076809585194,Spaghetti,0016049585385,Spaghettoni,,false
+barilla,8076809585194,Spaghetti,0076808280081,SPAGHETTI,,false
+barilla,8076802085981,Fusilli n.98,4009046013933,Fusilli N 98,,false
+barilla,8076809585200,Penne Rigate,7076827085738,Penne Rigate,,true
+barilla,8076809585828,Fusilli,8076809545464,Fusilli,,false
+barilla,8076809570633,Bio Fusilli,8076809585286,Fusilli,,false
+kagi,7610046115014,Kägi fret,7610046012801,Kägi fret classic,85.0,true
+le parfait,7613292347758,Mousse Original,7613292344443,la Parfait Mousse,,false
+ricola,76107207,CitronMélisse,7610700946053,Zitronenmelisse,,false
+monini,8005510008319,Pesto,8005510003727,Pesto monini,,true
+monini,80508892,Olivenöl,8005510005080,Monini Olivenöl,,true
+monini,8005510008319,Pesto,8005510005844,Pesto,,true
+handl tyrol,9001745016029,Schinken Chips,4061461442521,Schinken-Chips - Original,6.2,true
