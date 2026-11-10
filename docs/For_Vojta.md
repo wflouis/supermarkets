@@ -3,8 +3,6 @@
 Ahoj Vojto, tady je všechno, co potřebuješ vědět o datech, abys mohl postavit SQL databázi
 (PostgreSQL). Stav k 10. 11. 2026, větev `data/off-acquisition-v1`.
 
-*Spanish version: [`For_Vojta_es.md`](For_Vojta_es.md).*
-
 **Zkrácená verze:** všechno důležité je v jedné tabulce,
 `data/processed/products_matched.parquet` (2 443 řádků, jeden řádek = jeden produkt v jednom
 řetězci). Pro analýzu (H1, H2) je použitelných **1 045 produktů**, které mají cenu za 100 g/ml,
