@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:17
+    container_name: supermarkets_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: supermarkets
+      POSTGRES_USER: DA_team
+      POSTGRES_PASSWORD: DataAnalytics
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
